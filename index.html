@@ -1,0 +1,4259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acompanhamento Financeiro — Dashboard Mensal e Anual</title>
+  <meta name="description" content="Dashboard financeiro estratégico para acompanhamento mensal e anual de Anuidades e Autos de Infração, metas, diagnósticos inteligentes, importação de PDF/XLSX/Drive e exportação de relatórios." />
+  <style>
+    :root {
+      --bg-0: #050406;
+      --bg-1: #0c0708;
+      --bg-2: #140b0c;
+      --bg-3: #1d1011;
+      --card-bg: linear-gradient(155deg, rgba(24, 13, 14, 0.94) 0%, rgba(12, 7, 8, 0.97) 100%);
+      --card-bg-solid: #140b0c;
+      --border: rgba(255, 86, 36, 0.18);
+      --border-strong: rgba(255, 102, 26, 0.42);
+      --text-primary: #fdf7f5;
+      --text-secondary: #cbb5b0;
+      --text-muted: #8f7772;
+      --red-vivid: #ff1e3c;
+      --red-deep: #c90f2b;
+      --orange-vivid: #ff5e00;
+      --orange-bright: #ff8c00;
+      --amber: #ffb020;
+      --grad-brand: linear-gradient(135deg, #ff1738 0%, #ff4d0f 52%, #ff8c00 100%);
+      --grad-brand-soft: linear-gradient(135deg, rgba(255, 23, 56, 0.16) 0%, rgba(255, 106, 0, 0.14) 100%);
+      --grad-dark: radial-gradient(circle at 12% 0%, rgba(255, 24, 56, 0.22) 0%, transparent 46%),
+                   radial-gradient(circle at 88% 4%, rgba(255, 106, 0, 0.18) 0%, transparent 44%),
+                   linear-gradient(180deg, #0b0506 0%, #050406 42%, #090405 100%);
+      --success: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.13);
+      --danger: #ff2e4c;
+      --danger-bg: rgba(255, 46, 76, 0.15);
+      --warning: #ff9800;
+      --warning-bg: rgba(255, 152, 0, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 140, 64, 0.08);
+      --shadow-glow: 0 8px 26px rgba(255, 62, 20, 0.28);
+      --font-sans: 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background-color: var(--bg-0);
+      background-image: var(--grad-dark);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular { font-variant-numeric: tabular-nums; }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #090506; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff2442, #ff6a00); border-radius: 99px; }
+
+    /* App Shell */
+    .app-shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px 22px 48px;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(28, 12, 14, 0.94) 0%, rgba(14, 8, 9, 0.96) 65%, rgba(30, 14, 8, 0.94) 100%);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .topbar::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--grad-brand);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--grad-brand);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow-glow);
+      flex-shrink: 0;
+    }
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 780;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 3px;
+    }
+
+    .live-date-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 9px;
+      border-radius: 99px;
+      background: rgba(255, 77, 15, 0.16);
+      border: 1px solid rgba(255, 110, 32, 0.34);
+      color: #ffb878;
+      font-size: 0.73rem;
+      font-weight: 600;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #ff6a00;
+      box-shadow: 0 0 8px #ff4500;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 650;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      font-family: inherit;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+    .btn:active { transform: translateY(1px) scale(0.99); }
+
+    .btn-primary {
+      background: var(--grad-brand);
+      color: #ffffff;
+      box-shadow: var(--shadow-glow);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 10px 30px rgba(255, 58, 18, 0.42);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 86, 36, 0.11);
+      border-color: rgba(255, 98, 42, 0.3);
+      color: #ffd5c2;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 86, 36, 0.2);
+      border-color: rgba(255, 120, 48, 0.58);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 86, 36, 0.12);
+      border-color: rgba(255, 98, 42, 0.35);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: rgba(255, 30, 60, 0.14);
+      border-color: rgba(255, 42, 75, 0.38);
+      color: #ff8a9b;
+    }
+    .btn-danger:hover {
+      background: rgba(255, 30, 60, 0.26);
+      border-color: rgba(255, 54, 84, 0.72);
+      color: #ffffff;
+    }
+
+    .btn-sm { padding: 6px 10px; font-size: 0.76rem; border-radius: 8px; }
+    .btn-icon { padding: 6px 8px; font-size: 0.78rem; border-radius: 7px; }
+
+    /* Control Strip (Years + Demo Notice) */
+    .control-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .year-switcher {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      background: rgba(18, 10, 11, 0.9);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .year-chip {
+      padding: 6px 13px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .year-chip:hover { color: #fff; background: rgba(255, 92, 36, 0.14); }
+    .year-chip.active {
+      background: var(--grad-brand);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 56, 18, 0.35);
+    }
+    .year-chip.future-tag::after {
+      content: "PROX";
+      font-size: 0.6rem;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: rgba(255, 176, 32, 0.22);
+      color: #ffc65c;
+      font-weight: 700;
+    }
+    .year-chip.active.future-tag::after {
+      background: rgba(0, 0, 0, 0.28);
+      color: #fff;
+    }
+
+    .compare-select-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .select-box {
+      background: #140b0c;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 7px 11px;
+      font-size: 0.81rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+    .select-box:focus { border-color: var(--orange-vivid); }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 86, 36, 0.16);
+      padding-bottom: 10px;
+    }
+    .nav-tab {
+      padding: 9px 16px;
+      border-radius: 10px;
+      background: rgba(20, 11, 12, 0.72);
+      border: 1px solid rgba(255, 86, 36, 0.12);
+      color: var(--text-secondary);
+      font-weight: 650;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+    }
+    .nav-tab:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 106, 32, 0.36);
+      background: rgba(255, 68, 24, 0.1);
+    }
+    .nav-tab.active {
+      background: var(--grad-brand);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(255, 58, 18, 0.32);
+    }
+    .tab-badge {
+      padding: 1px 6px;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      background: rgba(255, 30, 60, 0.28);
+      color: #ffb4be;
+      font-weight: 700;
+    }
+    .nav-tab.active .tab-badge {
+      background: rgba(0, 0, 0, 0.28);
+      color: #fff;
+    }
+
+    /* Demo Banner */
+    .demo-banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 15px;
+      border-radius: 11px;
+      background: linear-gradient(90deg, rgba(255, 30, 60, 0.12), rgba(255, 118, 0, 0.12));
+      border: 1px solid rgba(255, 102, 26, 0.3);
+      margin-bottom: 16px;
+      font-size: 0.8rem;
+      color: #f4d3c8;
+    }
+
+    /* Cards & Grids */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 17px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s ease, border-color 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: var(--grad-brand);
+      opacity: 0.88;
+    }
+    .kpi-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .kpi-value {
+      font-size: 1.48rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .kpi-sub {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .delta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .delta-up { background: var(--success-bg); color: #4ade80; }
+    .delta-down { background: var(--danger-bg); color: #ff6b81; }
+    .delta-flat { background: rgba(255, 255, 255, 0.07); color: var(--text-secondary); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .grid-equal {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 1040px) {
+      .grid-2, .grid-equal { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 16px;
+    }
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 740;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .panel-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Filter Pills */
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .filter-pill {
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 650;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 92, 36, 0.16);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .filter-pill:hover { color: #fff; border-color: rgba(255, 110, 32, 0.45); }
+    .filter-pill.active {
+      background: var(--grad-brand);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* SVG Charts */
+    .chart-box {
+      width: 100%;
+      position: relative;
+      min-height: 270px;
+    }
+    .chart-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+    .chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      background: rgba(14, 7, 8, 0.96);
+      border: 1px solid rgba(255, 94, 0, 0.55);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      min-width: 175px;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+    .chart-tooltip.visible { opacity: 1; }
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 10px;
+      font-size: 0.77rem;
+      color: var(--text-secondary);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-swatch { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+
+    /* Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin-top: 7px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--grad-brand);
+      transition: width 0.35s ease;
+    }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 86, 36, 0.16);
+      background: rgba(10, 6, 7, 0.75);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.81rem;
+    }
+    thead th {
+      text-align: left;
+      padding: 11px 12px;
+      font-size: 0.72rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #ffd5c2;
+      background: linear-gradient(180deg, rgba(255, 42, 24, 0.2) 0%, rgba(255, 94, 0, 0.12) 100%);
+      border-bottom: 1px solid rgba(255, 96, 36, 0.28);
+      white-space: nowrap;
+    }
+    thead th.num, tbody td.num, tfoot td.num { text-align: right; }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    tbody tr { transition: background 0.14s ease; }
+    tbody tr:hover { background: rgba(255, 76, 20, 0.09); }
+    tbody tr.current-month-row {
+      background: rgba(255, 82, 18, 0.13);
+      box-shadow: inset 3px 0 0 #ff5e00;
+    }
+    tbody tr.future-month-row td { color: var(--text-muted); }
+    tfoot td {
+      padding: 12px 12px;
+      font-weight: 800;
+      background: linear-gradient(90deg, rgba(255, 23, 56, 0.18), rgba(255, 118, 0, 0.16));
+      border-top: 1px solid rgba(255, 102, 26, 0.38);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .status-hit { background: var(--success-bg); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.28); }
+    .status-warn { background: var(--warning-bg); color: #ffb74d; border: 1px solid rgba(255, 152, 0, 0.34); }
+    .status-miss { background: var(--danger-bg); color: #ff6b81; border: 1px solid rgba(255, 46, 76, 0.36); }
+    .status-future { background: rgba(255, 255, 255, 0.06); color: #b5a39e; border: 1px solid rgba(255, 255, 255, 0.12); }
+
+    /* Category Bars */
+    .cat-list { display: flex; flex-direction: column; gap: 13px; }
+    .cat-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .cat-name { font-size: 0.82rem; font-weight: 650; color: var(--text-primary); }
+    .cat-val { font-size: 0.84rem; font-weight: 750; }
+    .cat-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; display: flex; justify-content: space-between; }
+
+    /* Insights & Solutions Cards */
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+      gap: 12px;
+    }
+    .insight-card {
+      padding: 14px 15px;
+      border-radius: 12px;
+      background: rgba(255, 76, 20, 0.06);
+      border: 1px solid rgba(255, 92, 36, 0.2);
+    }
+    .insight-card h4 {
+      font-size: 0.84rem;
+      font-weight: 750;
+      margin-bottom: 5px;
+      color: #ffb884;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .insight-card p { font-size: 0.79rem; color: var(--text-secondary); line-height: 1.5; }
+
+    .solution-card {
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(36, 12, 16, 0.92), rgba(16, 8, 9, 0.96));
+      border: 1px solid rgba(255, 42, 75, 0.34);
+      margin-bottom: 12px;
+    }
+    .solution-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .solution-actions {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .solution-actions li {
+      padding: 9px 11px;
+      border-radius: 9px;
+      background: rgba(255, 94, 0, 0.08);
+      border: 1px solid rgba(255, 108, 36, 0.18);
+      font-size: 0.79rem;
+      color: #f0dcd6;
+    }
+
+    /* Import Dropzones */
+    .import-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .dropzone {
+      border: 1.5px dashed rgba(255, 98, 36, 0.45);
+      border-radius: 15px;
+      padding: 22px 18px;
+      background: linear-gradient(160deg, rgba(28, 12, 14, 0.7), rgba(13, 7, 8, 0.9));
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .dropzone.dragover {
+      border-color: #ff8c00;
+      background: rgba(255, 78, 18, 0.16);
+      transform: scale(1.01);
+    }
+    .drop-icon {
+      width: 48px; height: 48px;
+      border-radius: 13px;
+      background: var(--grad-brand-soft);
+      border: 1px solid rgba(255, 96, 36, 0.35);
+      display: grid;
+      place-items: center;
+      color: #ff7e29;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    /* Form Controls */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 0.76rem;
+      font-weight: 650;
+      color: var(--text-secondary);
+    }
+    .input {
+      background: #12090a;
+      border: 1px solid rgba(255, 92, 36, 0.26);
+      border-radius: 9px;
+      padding: 9px 11px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .input:focus {
+      border-color: #ff6a00;
+      box-shadow: 0 0 0 3px rgba(255, 94, 0, 0.18);
+    }
+    .input-sm { padding: 6px 8px; font-size: 0.8rem; border-radius: 7px; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 1, 2, 0.78);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(160deg, #1b0d0f 0%, #0e0708 100%);
+      border: 1px solid rgba(255, 96, 36, 0.36);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.82);
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 86, 36, 0.18);
+    }
+    .modal-foot {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 86, 36, 0.15);
+    }
+
+    /* Toast */
+    .toast-stack {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 380px;
+    }
+    .toast {
+      padding: 11px 15px;
+      border-radius: 11px;
+      background: #1a0d0f;
+      border: 1px solid rgba(255, 102, 26, 0.45);
+      color: #fff;
+      font-size: 0.82rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+      animation: slideIn 0.2s ease;
+    }
+    .toast.success { border-color: rgba(34, 197, 94, 0.55); }
+    .toast.error { border-color: rgba(255, 30, 60, 0.65); }
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .tab-section { display: none; }
+    .tab-section.active { display: block; animation: fadeIn 0.18s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .heatmap-cell {
+      border-radius: 6px;
+      padding: 5px 7px;
+      font-weight: 650;
+      font-size: 0.76rem;
+      text-align: right;
+    }
+
+    .helper-note {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Print Styling for Presentation PDF */
+    @media print {
+      body { background: #0a0607 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .header-actions, .nav-tabs, .demo-banner, .no-print { display: none !important; }
+      .tab-section { display: block !important; page-break-inside: avoid; }
+      .panel, .kpi-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Command Bar -->
+    <header class="topbar">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" />
+            <path d="M7 15l4-5 4 3 5-7" />
+            <circle cx="20" cy="6" r="1.5" fill="#fff" />
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>Acompanhamento Financeiro</h1>
+          <div class="brand-sub">
+            <span>Anuidades &amp; Autos de Infração</span>
+            <span class="live-date-pill" id="liveDatePill">
+              <span class="live-dot"></span>
+              <span id="liveDateText">Sincronizando data...</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions no-print">
+        <button class="btn btn-primary" id="btnOpenInsert">+ Inserir Dados</button>
+        <button class="btn btn-danger" id="btnOpenDelete" title="Excluir mês, ano, metas ou limpar dados">Excluir Dados</button>
+        <button class="btn btn-secondary" id="btnExportPDF" title="Gerar relatório executivo em PDF">Exportar .PDF</button>
+        <button class="btn btn-secondary" id="btnExportXLSX" title="Gerar planilha completa em Excel .xlsx">Exportar .XLSX</button>
+        <button class="btn btn-ghost" id="btnPrintView" title="Imprimir ou salvar visualização visual">Apresentação</button>
+      </div>
+    </header>
+
+    <!-- Demo Banner (hidden once user clears or dismisses) -->
+    <div class="demo-banner no-print" id="demoBanner" style="display:none;">
+      <div>
+        <strong>Base inicial ilustrativa (2023–2026) carregada</strong> para demonstração imediata dos comparativos e metas. Você pode editar qualquer mês, importar seus arquivos (.pdf/.xlsx/Drive) ou limpar tudo para inserir seus dados reais.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-danger btn-sm" id="btnClearAllData">Limpar Tudo e Começar do Zero</button>
+        <button class="btn btn-ghost btn-sm" id="btnDismissDemo">Ocultar Aviso</button>
+      </div>
+    </div>
+
+    <!-- Year & Comparison Bar -->
+    <div class="control-bar no-print">
+      <div class="year-switcher" id="yearSwitcher" role="tablist" aria-label="Selecionar ano"></div>
+      <div class="compare-select-wrap">
+        <label style="font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          Comparar com:
+          <select class="select-box" id="compareYearSelect"></select>
+        </label>
+        <button class="btn btn-secondary btn-sm" id="btnAddNextYear">+ Próximo Ano</button>
+        <button class="btn btn-danger btn-sm" id="btnDeleteYear">Excluir Ano</button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs no-print" role="tablist">
+      <button class="nav-tab active" data-tab="overview">Visão Geral &amp; Indicadores</button>
+      <button class="nav-tab" data-tab="monthly">Comparativo Mensal (MoM)</button>
+      <button class="nav-tab" data-tab="annual">Comparativo Anual (2023+)</button>
+      <button class="nav-tab" data-tab="goals">Metas &amp; Soluções <span class="tab-badge" id="missedGoalsBadge">0</span></button>
+      <button class="nav-tab" data-tab="import">Importar (PDF · XLSX · Drive)</button>
+    </nav>
+
+    <!-- ==================== TAB 1: OVERVIEW ==================== -->
+    <section class="tab-section active" id="tab-overview">
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title" id="mainChartTitle">Evolução Mensal Comparativa</div>
+              <div class="panel-desc" id="mainChartDesc">Comparativo mês a mês entre ano principal, ano base e linha de meta</div>
+            </div>
+            <div class="pill-group" id="overviewCatFilter"></div>
+          </div>
+          <div class="chart-box" id="mainEvolutionChart"></div>
+          <div class="chart-legend" id="mainChartLegend"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Composição por Campo Comparativo</div>
+              <div class="panel-desc">Participação e variação YoY no ano selecionado</div>
+            </div>
+          </div>
+          <div class="cat-list" id="categoryBreakdown"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Diagnóstico Automático &amp; Principais Indicadores</div>
+            <div class="panel-desc">Leitura inteligente baseada nos dados financeiros cadastrados</div>
+          </div>
+        </div>
+        <div class="insight-grid" id="autoInsightsGrid"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: MONTHLY ==================== -->
+    <section class="tab-section" id="tab-monthly">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Variação Mês a Mês (MoM %)</div>
+            <div class="panel-desc">Oscilação percentual em relação ao mês imediatamente anterior</div>
+          </div>
+          <div class="pill-group" id="momCatFilter"></div>
+        </div>
+        <div class="chart-box" id="momChart"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title" id="monthlyTableTitle">Detalhamento Mensal</div>
+            <div class="panel-desc">Clique em Inserir, Editar ou Excluir para manipular os valores de cada mês</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" id="btnInsertFromTable">+ Inserir / Editar Mês</button>
+            <button class="btn btn-danger btn-sm" id="btnClearYearMonths">Zerar Meses do Ano</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="monthlyTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: ANNUAL ==================== -->
+    <section class="tab-section" id="tab-annual">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Comparativo Anual Consolidado (Todos os Anos)</div>
+            <div class="panel-desc">Expande automaticamente conforme novos anos entram no calendário ou são adicionados</div>
+          </div>
+          <div class="pill-group" id="annualCatFilter"></div>
+        </div>
+        <div class="chart-box" id="annualBarChart"></div>
+        <div class="chart-legend" id="annualChartLegend"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Matriz Anual por Campo Comparativo</div>
+            <div class="panel-desc">Evolução completa ano a ano com crescimento percentual YoY e CAGR</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="annualMatrixTable"></table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Mapa Comparativo Mês × Ano (Total Geral)</div>
+            <div class="panel-desc">Compare o desempenho do mesmo mês ao longo de 2023, 2024, 2025, 2026 e próximos anos</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="monthYearHeatmap"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: GOALS & SOLUTIONS ==================== -->
+    <section class="tab-section" id="tab-goals">
+      <div class="kpi-grid" id="goalsKpiGrid"></div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Sistema de Metas — Próximos Meses &amp; Ano Selecionado</div>
+            <div class="panel-desc">Defina metas mensais manualmente ou gere projeções automáticas com base na sazonalidade histórica</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <label style="font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+              Crescimento alvo (%):
+              <input type="number" class="input input-sm" id="autoGoalGrowthPct" value="10" min="-50" max="200" step="1" style="width:74px;" />
+            </label>
+            <button class="btn btn-primary btn-sm" id="btnAutoGenerateGoals">Gerar Metas Inteligentes</button>
+            <button class="btn btn-danger btn-sm" id="btnDeleteYearGoals">Excluir Metas do Ano</button>
+          </div>
+        </div>
+        <div class="chart-box" id="goalsComparisonChart"></div>
+        <div class="chart-legend" id="goalsChartLegend"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Plano de Soluções para Metas Não Alcançadas</div>
+            <div class="panel-desc">Diagnóstico automático de déficits por mês e categoria com ações corretivas priorizadas</div>
+          </div>
+        </div>
+        <div id="solutionsContainer"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Editor de Metas Mensais (<span id="goalEditorYearLabel"></span>)</div>
+            <div class="panel-desc">Altere a meta de qualquer mês (atual ou futuro) e salve diretamente</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="goalsEditorTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: IMPORT ==================== -->
+    <section class="tab-section" id="tab-import">
+      <div class="import-grid">
+        <!-- XLSX / CSV Import -->
+        <div class="dropzone" id="dropzoneXlsx">
+          <div class="drop-icon">XLSX</div>
+          <div>
+            <div style="font-weight:750;font-size:0.95rem;margin-bottom:4px;">Importar Planilha (.xlsx / .csv)</div>
+            <div class="helper-note">Arraste e solte aqui ou selecione do computador. Leitura inteligente automática de abas, meses, anos e dos 5 campos comparativos.</div>
+          </div>
+          <input type="file" id="fileInputXlsx" accept=".xlsx,.csv,.tsv,.txt" hidden />
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+            <button class="btn btn-primary btn-sm" id="btnPickXlsx">Selecionar .XLSX / .CSV</button>
+            <button class="btn btn-ghost btn-sm" id="btnDownloadTemplate">Baixar Modelo .XLSX</button>
+          </div>
+        </div>
+
+        <!-- PDF Import -->
+        <div class="dropzone" id="dropzonePdf">
+          <div class="drop-icon">PDF</div>
+          <div>
+            <div style="font-weight:750;font-size:0.95rem;margin-bottom:4px;">Importar Relatório (.pdf)</div>
+            <div class="helper-note">Extração autônoma de texto e tabelas em PDF. Reconhece valores monetários (R$), meses, anos e categorias de arrecadação.</div>
+          </div>
+          <input type="file" id="fileInputPdf" accept=".pdf" hidden />
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+            <button class="btn btn-primary btn-sm" id="btnPickPdf">Selecionar .PDF</button>
+          </div>
+        </div>
+
+        <!-- Google Drive Link Import -->
+        <div class="dropzone" id="dropzoneDrive" style="text-align:left;align-items:stretch;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="drop-icon" style="flex-shrink:0;">DRIVE</div>
+            <div>
+              <div style="font-weight:750;font-size:0.95rem;">Importar via Link do Google Drive</div>
+              <div class="helper-note">Cole link do Google Sheets, Docs ou PDF no Drive.</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="driveUrlInput">URL do Google Drive / Sheets</label>
+            <input type="url" class="input" id="driveUrlInput" placeholder="https://docs.google.com/spreadsheets/d/... ou drive.google.com/file/d/..." />
+          </div>
+          <div class="field">
+            <label for="driveLabelInput">Descrição / Referência (opcional)</label>
+            <input type="text" class="input input-sm" id="driveLabelInput" placeholder="Ex.: Relatório Arrecadação 2026" />
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" id="btnFetchDrive">Ler e Extrair do Drive</button>
+            <button class="btn btn-secondary btn-sm" id="btnSaveDriveLink">Salvar Link</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Text Paste Fallback & Autonomous Parser -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Extração Inteligente via Texto / Conteúdo Copiado</div>
+            <div class="panel-desc">Cole qualquer tabela copiada do Google Sheets, Excel ou PDF (útil para arquivos privados do Drive) e clique em Extrair</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <label style="font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+              Ano padrão (se não constar no texto):
+              <select class="select-box" id="importDefaultYear"></select>
+            </label>
+            <button class="btn btn-primary btn-sm" id="btnParseRawText">Extrair Dados Automaticamente</button>
+          </div>
+        </div>
+        <textarea class="input mono" id="rawTextInput" rows="4" placeholder="Exemplo:&#10;Janeiro/2026 | Anuidades Farmacêuticos e Técnicos: 512.400,00 | Anuidades Pessoa Jurídica: 389.200,00 | Autos de Infração Administrativo: 42.100,00 | Autos de Infração Dívida Ativa: 29.850,00"></textarea>
+      </div>
+
+      <!-- Extraction Preview Panel -->
+      <div class="panel" id="extractionPreviewPanel" style="display:none;border-color:rgba(255, 118, 0, 0.55);">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title" style="color:#ffb066;">Prévia da Extração Inteligente</div>
+            <div class="panel-desc" id="extractionSummaryText">Revise os dados identificados antes de confirmar a importação no dashboard</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <select class="select-box" id="importMergeMode">
+              <option value="merge">Mesclar (atualiza apenas campos detectados)</option>
+              <option value="replace">Substituir mês inteiro pelos novos valores</option>
+            </select>
+            <button class="btn btn-primary btn-sm" id="btnConfirmImport">Confirmar e Importar</button>
+            <button class="btn btn-ghost btn-sm" id="btnCancelImport">Cancelar</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="extractionPreviewTable"></table>
+        </div>
+      </div>
+
+      <!-- Saved Drive Links & Backup -->
+      <div class="grid-equal">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Links do Google Drive Salvos</div>
+              <div class="panel-desc">Acesso rápido aos seus arquivos e pastas financeiras</div>
+            </div>
+          </div>
+          <div id="savedDriveLinksList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Backup &amp; Restauração Completa (.JSON)</div>
+              <div class="panel-desc">Salve toda a base (2023–futuro, metas e links) ou restaure em outro navegador</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+            <button class="btn btn-secondary btn-sm" id="btnExportJSON">Baixar Backup .JSON</button>
+            <input type="file" id="fileInputJson" accept=".json" hidden />
+            <button class="btn btn-ghost btn-sm" id="btnImportJSON">Restaurar Backup .JSON</button>
+            <button class="btn btn-ghost btn-sm" id="btnRestoreDemo">Recarregar Dados Exemplo</button>
+          </div>
+          <div class="helper-note">Seus dados financeiros ficam armazenados com segurança localmente no seu navegador (<code>localStorage</code>), garantindo privacidade total mesmo quando o dashboard é acessado por link público.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Insert / Edit Modal -->
+  <div class="modal-backdrop" id="entryModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="entryModalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="entryModalTitle" style="font-size:1.1rem;font-weight:780;">Inserir / Editar Dados Mensais</h2>
+          <div class="helper-note">Autos de Infração (ADM.+DÍV. ATIVA) é calculado automaticamente pela soma de Administrativo + Dívida Ativa (ou pode ser ajustado manualmente).</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btnCloseEntryModal">Fechar</button>
+      </div>
+
+      <form id="entryForm">
+        <div class="form-grid" style="margin-bottom:14px;">
+          <div class="field">
+            <label for="entryYear">Ano</label>
+            <select class="select-box" id="entryYear" required></select>
+          </div>
+          <div class="field">
+            <label for="entryMonth">Mês</label>
+            <select class="select-box" id="entryMonth" required></select>
+          </div>
+          <div class="field">
+            <label for="entryGoal">Meta Total do Mês (R$)</label>
+            <input type="text" class="input mono" id="entryGoal" placeholder="0,00" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="f_anuidades_pf">Anuidades Farmacêuticos e Técnicos (R$)</label>
+            <input type="text" class="input mono" id="f_anuidades_pf" placeholder="0,00" />
+          </div>
+          <div class="field">
+            <label for="f_anuidades_pj">Anuidades Pessoa Jurídica (R$)</label>
+            <input type="text" class="input mono" id="f_anuidades_pj" placeholder="0,00" />
+          </div>
+          <div class="field">
+            <label for="f_autos_adm">Autos de Infração Administrativo (R$)</label>
+            <input type="text" class="input mono" id="f_autos_adm" placeholder="0,00" />
+          </div>
+          <div class="field">
+            <label for="f_autos_da">Autos de Infração Dívida Ativa (R$)</label>
+            <input type="text" class="input mono" id="f_autos_da" placeholder="0,00" />
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="f_autos_total" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>Autos de Infração (ADM.+DÍV. ATIVA) (R$)</span>
+              <span style="font-size:0.72rem;color:#ff9d5c;">
+                <input type="checkbox" id="f_autos_manual" style="vertical-align:middle;margin-right:4px;" />
+                Sobrescrever manualmente
+              </span>
+            </label>
+            <input type="text" class="input mono" id="f_autos_total" placeholder="Calculado automaticamente" readonly />
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:12px 14px;border-radius:11px;background:rgba(255,72,18,0.1);border:1px solid rgba(255,98,36,0.28);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <span style="font-size:0.82rem;color:var(--text-secondary);">Total Geral Previsto no Mês (Anuidades PF + PJ + Autos ADM.+DÍV. ATIVA):</span>
+          <strong class="mono" id="entryComputedTotal" style="font-size:1.15rem;color:#ffb46e;">R$ 0,00</strong>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-danger" id="btnDeleteEntryInModal">Excluir Dados deste Mês</button>
+          <div style="flex:1;"></div>
+          <button type="button" class="btn btn-ghost" id="btnCancelEntryModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Lançamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Center Modal -->
+  <div class="modal-backdrop" id="deleteCenterModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="deleteCenterTitle">
+    <div class="modal" style="max-width:560px;">
+      <div class="modal-head">
+        <div>
+          <h2 id="deleteCenterTitle" style="font-size:1.08rem;font-weight:780;color:#ff8a9b;">Central de Exclusão de Dados</h2>
+          <div class="helper-note">Escolha exatamente o que deseja excluir com segurança.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btnCloseDeleteCenter">Fechar</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="padding:14px;border-radius:12px;background:rgba(255,46,76,0.08);border:1px solid rgba(255,46,76,0.28);">
+          <div style="font-weight:700;font-size:0.86rem;margin-bottom:8px;">1. Excluir dados de um mês específico</div>
+          <div class="form-grid" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="delSelectYear">Ano</label>
+              <select class="select-box" id="delSelectYear"></select>
+            </div>
+            <div class="field">
+              <label for="delSelectMonth">Mês</label>
+              <select class="select-box" id="delSelectMonth"></select>
+            </div>
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" id="btnExecDeleteMonth">Excluir Mês Selecionado</button>
+        </div>
+
+        <div style="padding:14px;border-radius:12px;background:rgba(255,94,0,0.07);border:1px solid rgba(255,94,0,0.24);">
+          <div style="font-weight:700;font-size:0.86rem;margin-bottom:8px;">2. Ações rápidas no ano selecionado (<span id="delCenterYearLabel"></span>)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button type="button" class="btn btn-danger btn-sm" id="btnExecClearYearMonths">Zerar 12 Meses do Ano</button>
+            <button type="button" class="btn btn-danger btn-sm" id="btnExecClearYearGoals">Excluir Metas do Ano</button>
+            <button type="button" class="btn btn-danger btn-sm" id="btnExecDeleteWholeYear">Excluir Ano Inteiro</button>
+          </div>
+        </div>
+
+        <div style="padding:14px;border-radius:12px;background:rgba(255,23,56,0.12);border:1px solid rgba(255,30,60,0.36);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-weight:700;font-size:0.86rem;color:#ff8a9b;">3. Zerar toda a base (todos os anos e metas)</div>
+            <div class="helper-note">Remove todos os lançamentos para começar 100% do zero.</div>
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" id="btnExecClearEverything">Zerar Tudo</button>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="btnCancelDeleteCenter">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom In-Page Confirmation Modal (works reliably inside iframes & browsers) -->
+  <div class="modal-backdrop" id="confirmModalBackdrop" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" style="z-index:1500;">
+    <div class="modal" style="max-width:460px;border-color:rgba(255,46,76,0.55);">
+      <div class="modal-head" style="margin-bottom:12px;">
+        <h2 id="confirmModalTitle" style="font-size:1.05rem;font-weight:780;color:#ff8a9b;">Confirmar Exclusão</h2>
+        <button class="btn btn-ghost btn-sm" id="btnCloseConfirmModal">×</button>
+      </div>
+      <p id="confirmModalMessage" style="font-size:0.88rem;color:var(--text-primary);line-height:1.55;margin-bottom:6px;"></p>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="btnConfirmCancel">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmProceed">Confirmar Exclusão</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip & Toast -->
+  <div class="chart-tooltip" id="chartTooltip"></div>
+  <div class="toast-stack" id="toastStack"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    /* =====================================================================
+       1. CONSTANTS, SCHEMA & DYNAMIC CALENDAR ENGINE
+       ===================================================================== */
+    const STORAGE_KEY = 'ignis_financeiro_v1';
+    const MONTHS = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+    const CATEGORIES = [
+      { key: 'anuidades_pf', label: 'Anuidades Farmacêuticos e Técnicos', short: 'Anuid. Farm./Téc.', color: '#ff2442' },
+      { key: 'anuidades_pj', label: 'Anuidades Pessoa Jurídica', short: 'Anuid. PJ', color: '#ff6a00' },
+      { key: 'autos_adm',    label: 'Autos de Infração Administrativo', short: 'Autos Adm.', color: '#ff9e1b' },
+      { key: 'autos_da',     label: 'Autos de Infração Dívida Ativa', short: 'Autos Dív. Ativa', color: '#d90429' },
+      { key: 'autos_total',  label: 'Autos de Infração (ADM.+DÍV. ATIVA)', short: 'Autos (ADM+DA)', color: '#ff4d6d', computed: true }
+    ];
+
+    const NOW = new Date();
+    const CURRENT_YEAR = NOW.getFullYear();
+    const CURRENT_MONTH = NOW.getMonth(); // 0-11
+    const BASE_START_YEAR = 2023;
+
+    let state = null;
+    let activeTab = 'overview';
+    let selectedYear = CURRENT_YEAR >= 2023 ? CURRENT_YEAR : 2026;
+    let compareYear = selectedYear - 1;
+    let overviewCategory = 'total';
+    let momCategory = 'total';
+    let annualCategory = 'total';
+    let pendingImportRows = [];
+
+    /* =====================================================================
+       2. FORMATTERS & HELPERS
+       ===================================================================== */
+    const brlFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const brlCompact = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 });
+    const pctFmt = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    function fmtBRL(v) { return brlFmt.format(Number.isFinite(v) ? v : 0); }
+    function fmtCompact(v) { return brlCompact.format(Number.isFinite(v) ? v : 0); }
+    function fmtPct(v) { return (v > 0 ? '+' : '') + pctFmt.format(Number.isFinite(v) ? v : 0) + '%'; }
+    function fmtInputVal(v) {
+      if (!v && v !== 0) return '';
+      return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function parseNum(raw) {
+      if (typeof raw === 'number') return Number.isFinite(raw) ? raw : 0;
+      if (!raw) return 0;
+      let s = String(raw).trim().replace(/[R$\s]/g, '');
+      if (!s) return 0;
+      const hasComma = s.includes(',');
+      const hasDot = s.includes('.');
+      if (hasComma && hasDot) {
+        if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+          s = s.replace(/\./g, '').replace(',', '.');
+        } else {
+          s = s.replace(/,/g, '');
+        }
+      } else if (hasComma) {
+        const parts = s.split(',');
+        if (parts[parts.length - 1].length <= 2) {
+          s = s.replace(/\./g, '').replace(',', '.');
+        } else {
+          s = s.replace(/,/g, '');
+        }
+      } else if (hasDot) {
+        const parts = s.split('.');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+          s = s.replace(/\./g, '');
+        }
+      }
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? Math.max(0, Math.round(n * 100) / 100) : 0;
+    }
+
+    function stripAccents(str) {
+      return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    function showToast(msg, type = 'info') {
+      const stack = document.getElementById('toastStack');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      stack.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => el.remove(), 260);
+      }, 3600);
+    }
+
+    function emptyMonthRecord() {
+      return {
+        anuidades_pf: 0,
+        anuidades_pj: 0,
+        autos_adm: 0,
+        autos_da: 0,
+        autos_total: 0,
+        autos_manual: false
+      };
+    }
+
+    function normalizeRecord(rec) {
+      const r = Object.assign(emptyMonthRecord(), rec || {});
+      r.anuidades_pf = parseNum(r.anuidades_pf);
+      r.anuidades_pj = parseNum(r.anuidades_pj);
+      r.autos_adm = parseNum(r.autos_adm);
+      r.autos_da = parseNum(r.autos_da);
+      if (r.autos_manual) {
+        r.autos_total = parseNum(r.autos_total);
+      } else {
+        r.autos_total = Math.round((r.autos_adm + r.autos_da) * 100) / 100;
+      }
+      return r;
+    }
+
+    function getMonthTotal(rec) {
+      if (!rec) return 0;
+      const r = normalizeRecord(rec);
+      return Math.round((r.anuidades_pf + r.anuidades_pj + r.autos_total) * 100) / 100;
+    }
+
+    function hasMonthData(rec) {
+      if (!rec) return false;
+      return getMonthTotal(rec) > 0 || rec.autos_adm > 0 || rec.autos_da > 0;
+    }
+
+    function getMetricValue(rec, catKey) {
+      if (!rec) return 0;
+      const r = normalizeRecord(rec);
+      if (catKey === 'total') return getMonthTotal(r);
+      return r[catKey] || 0;
+    }
+
+    function isFutureMonth(year, monthIdx) {
+      return year > CURRENT_YEAR || (year === CURRENT_YEAR && monthIdx > CURRENT_MONTH);
+    }
+
+    function isCurrentMonth(year, monthIdx) {
+      return year === CURRENT_YEAR && monthIdx === CURRENT_MONTH;
+    }
+
+    /* =====================================================================
+       3. DEFAULT DATA GENERATOR (2023-2026 + AUTO FUTURE YEAR)
+       ===================================================================== */
+    function buildDemoState() {
+      const yearsData = {};
+      const goalsData = {};
+
+      // Realistic seasonality weights for CRF revenue (strong Q1 for Anuidades)
+      const pfSeason = [1.85, 1.65, 1.92, 0.92, 0.78, 0.72, 0.68, 0.65, 0.62, 0.66, 0.71, 0.84];
+      const pjSeason = [1.95, 1.72, 2.05, 0.88, 0.74, 0.69, 0.64, 0.62, 0.60, 0.65, 0.70, 0.76];
+      const admSeason = [0.82, 0.88, 0.96, 1.05, 1.12, 1.04, 1.08, 1.14, 1.02, 1.06, 0.98, 0.85];
+      const daSeason  = [0.76, 0.84, 0.92, 0.98, 1.04, 1.12, 1.06, 1.10, 1.18, 1.15, 1.08, 0.77];
+
+      const yearConfigs = {
+        2023: { mult: 1.00, pfBase: 310000, pjBase: 265000, admBase: 54000, daBase: 38000 },
+        2024: { mult: 1.09, pfBase: 338000, pjBase: 292000, admBase: 61000, daBase: 44000 },
+        2025: { mult: 1.18, pfBase: 368000, pjBase: 321000, admBase: 68500, daBase: 51500 },
+        2026: { mult: 1.25, pfBase: 394000, pjBase: 345000, admBase: 74000, daBase: 57000 }
+      };
+
+      const maxTargetYear = Math.max(2026, CURRENT_YEAR + 1);
+      for (let y = BASE_START_YEAR; y <= maxTargetYear; y++) {
+        yearsData[y] = Array.from({ length: 12 }, () => emptyMonthRecord());
+        goalsData[y] = Array.from({ length: 12 }, () => 0);
+
+        const cfg = yearConfigs[y];
+        for (let m = 0; m < 12; m++) {
+          const jitter = 1 + ((((y * 13 + m * 7) % 11) - 5) * 0.014);
+          if (cfg) {
+            const goalEstimate = Math.round((cfg.pfBase * pfSeason[m] + cfg.pjBase * pjSeason[m] + cfg.admBase * admSeason[m] + cfg.daBase * daSeason[m]) * 1.04);
+            goalsData[y][m] = goalEstimate;
+
+            // Populate realized months up to current month; leave strictly future months empty ready for entries
+            if (!isFutureMonth(y, m)) {
+              // Introduce deliberate slight misses in a couple of months of 2026 so the Solutions Engine showcases rich insights
+              const missFactor = (y === 2026 && (m === 6 || m === 8 || m === 10)) ? 0.84 : 1.0;
+              const pf = Math.round(cfg.pfBase * pfSeason[m] * jitter * missFactor);
+              const pj = Math.round(cfg.pjBase * pjSeason[m] * jitter * (missFactor < 1 ? 0.87 : 1.01));
+              const adm = Math.round(cfg.admBase * admSeason[m] * jitter * (missFactor < 1 ? 0.78 : 1.03));
+              const da = Math.round(cfg.daBase * daSeason[m] * jitter * (missFactor < 1 ? 0.75 : 1.02));
+              yearsData[y][m] = normalizeRecord({
+                anuidades_pf: pf,
+                anuidades_pj: pj,
+                autos_adm: adm,
+                autos_da: da,
+                autos_manual: false
+              });
+            }
+          } else {
+            // Auto-projected future year goals (+10% over prior year goal)
+            const prevGoal = goalsData[y - 1]?.[m] || 650000;
+            goalsData[y][m] = Math.round(prevGoal * 1.10);
+          }
+        }
+      }
+
+      return {
+        version: 1,
+        isDemo: true,
+        demoBannerDismissed: false,
+        years: yearsData,
+        goals: goalsData,
+        deletedYears: [],
+        driveLinks: [],
+        lastUpdated: new Date().toISOString()
+      };
+    }
+
+    function ensureDynamicCalendarYears(st) {
+      // Automatically recognizes current date and ensures 2023 .. max(2026, CURRENT_YEAR + 1) exist (unless explicitly deleted by user)
+      if (!Array.isArray(st.deletedYears)) st.deletedYears = [];
+      const minEndYear = Math.max(2026, CURRENT_YEAR + 1);
+      let added = [];
+      for (let y = BASE_START_YEAR; y <= minEndYear; y++) {
+        if (!st.years[y] && !st.deletedYears.includes(y)) {
+          st.years[y] = Array.from({ length: 12 }, () => emptyMonthRecord());
+          st.goals[y] = Array.from({ length: 12 }, (_, m) => {
+            const prev = st.goals[y - 1]?.[m] || getMonthTotal(st.years[y - 1]?.[m]);
+            return prev ? Math.round(prev * 1.08) : 0;
+          });
+          added.push(y);
+        }
+        if (st.years[y] && !st.goals[y]) st.goals[y] = Array.from({ length: 12 }, () => 0);
+      }
+      return added;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.years) {
+            ensureDynamicCalendarYears(parsed);
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Falha ao ler localStorage, usando base padrão:', e);
+      }
+      const demo = buildDemoState();
+      saveState(demo);
+      return demo;
+    }
+
+    function saveState(st = state) {
+      st.lastUpdated = new Date().toISOString();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+      } catch (e) {
+        console.warn('Erro ao salvar no localStorage:', e);
+      }
+    }
+
+    function getSortedYears() {
+      return Object.keys(state.years).map(Number).sort((a, b) => a - b);
+    }
+
+    function getYearTotals(year) {
+      const arr = state.years[year] || [];
+      const sum = { anuidades_pf: 0, anuidades_pj: 0, autos_adm: 0, autos_da: 0, autos_total: 0, total: 0, filledMonths: 0, goalTotal: 0, realizedGoalTotal: 0 };
+      const goals = state.goals[year] || [];
+      for (let m = 0; m < 12; m++) {
+        const r = normalizeRecord(arr[m]);
+        const t = getMonthTotal(r);
+        sum.anuidades_pf += r.anuidades_pf;
+        sum.anuidades_pj += r.anuidades_pj;
+        sum.autos_adm += r.autos_adm;
+        sum.autos_da += r.autos_da;
+        sum.autos_total += r.autos_total;
+        sum.total += t;
+        const g = parseNum(goals[m]);
+        sum.goalTotal += g;
+        if (hasMonthData(r)) {
+          sum.filledMonths++;
+          sum.realizedGoalTotal += g;
+        }
+      }
+      return sum;
+    }
+
+    function getYtdTotals(year, upToMonthCount) {
+      const arr = state.years[year] || [];
+      let total = 0;
+      for (let m = 0; m < Math.min(12, upToMonthCount); m++) {
+        total += getMonthTotal(arr[m]);
+      }
+      return total;
+    }
+
+    /* =====================================================================
+       4. TOOLTIP CONTROLLER
+       ===================================================================== */
+    const tooltipEl = document.getElementById('chartTooltip');
+    function showTooltip(evt, html) {
+      tooltipEl.innerHTML = html;
+      tooltipEl.classList.add('visible');
+      moveTooltip(evt);
+    }
+    function moveTooltip(evt) {
+      const pad = 14;
+      const w = tooltipEl.offsetWidth || 190;
+      const h = tooltipEl.offsetHeight || 90;
+      let x = evt.clientX + pad;
+      let y = evt.clientY - h / 2;
+      if (x + w > window.innerWidth - 10) x = evt.clientX - w - pad;
+      if (y < 10) y = 10;
+      if (y + h > window.innerHeight - 10) y = window.innerHeight - h - 10;
+      tooltipEl.style.left = x + 'px';
+      tooltipEl.style.top = y + 'px';
+    }
+    function hideTooltip() { tooltipEl.classList.remove('visible'); }
+
+    /* =====================================================================
+       5. RENDERERS — HEADER, CONTROLS & KPIs
+       ===================================================================== */
+    function renderHeaderControls() {
+      const dateStr = NOW.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      document.getElementById('liveDateText').textContent = `Hoje: ${dateStr} · ${MONTHS_SHORT[CURRENT_MONTH]}/${CURRENT_YEAR} (Auto-expansão ativa)`;
+
+      const banner = document.getElementById('demoBanner');
+      banner.style.display = (state.isDemo && !state.demoBannerDismissed) ? 'flex' : 'none';
+
+      const years = getSortedYears();
+      if (!years.includes(selectedYear)) selectedYear = years[years.length - 1];
+      if (!years.includes(compareYear) || compareYear === selectedYear) {
+        const idx = years.indexOf(selectedYear);
+        compareYear = idx > 0 ? years[idx - 1] : (years[1] || selectedYear);
+      }
+
+      // Year Switcher
+      const switcher = document.getElementById('yearSwitcher');
+      switcher.innerHTML = years.map(y => {
+        const isFut = y > CURRENT_YEAR;
+        const isAct = y === selectedYear;
+        return `<button class="year-chip ${isAct ? 'active' : ''} ${isFut ? 'future-tag' : ''}" data-year="${y}">${y}</button>`;
+      }).join('');
+      switcher.querySelectorAll('.year-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedYear = Number(btn.dataset.year);
+          const idx = years.indexOf(selectedYear);
+          if (idx > 0) compareYear = years[idx - 1];
+          renderAll();
+        });
+      });
+
+      // Compare Year Selector
+      const cmpSel = document.getElementById('compareYearSelect');
+      cmpSel.innerHTML = years.map(y => `<option value="${y}" ${y === compareYear ? 'selected' : ''}>${y}${y === selectedYear ? ' (mesmo)' : ''}</option>`).join('');
+
+      // Default Import Year Selector
+      const impSel = document.getElementById('importDefaultYear');
+      impSel.innerHTML = years.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`).join('');
+
+      // Category Filter Pills
+      const catOptions = [{ key: 'total', short: 'Total Geral' }, ...CATEGORIES];
+      renderPillBar('overviewCatFilter', catOptions, overviewCategory, k => { overviewCategory = k; renderOverview(); });
+      renderPillBar('momCatFilter', catOptions, momCategory, k => { momCategory = k; renderMonthly(); });
+      renderPillBar('annualCatFilter', catOptions, annualCategory, k => { annualCategory = k; renderAnnual(); });
+    }
+
+    function renderPillBar(containerId, items, activeKey, onPick) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map(it => `<button class="filter-pill ${it.key === activeKey ? 'active' : ''}" data-key="${it.key}">${escapeHtml(it.short)}</button>`).join('');
+      el.querySelectorAll('.filter-pill').forEach(b => b.addEventListener('click', () => onPick(b.dataset.key)));
+    }
+
+    function deltaBadge(pct) {
+      if (pct === null || !Number.isFinite(pct)) return `<span class="delta-pill delta-flat">s/ base</span>`;
+      const cls = pct > 0.05 ? 'delta-up' : (pct < -0.05 ? 'delta-down' : 'delta-flat');
+      const arrow = pct > 0.05 ? '▲' : (pct < -0.05 ? '▼' : '•');
+      return `<span class="delta-pill ${cls}">${arrow} ${fmtPct(pct)}</span>`;
+    }
+
+    /* =====================================================================
+       6. TAB 1 — OVERVIEW & KEY FINANCIAL INDICATORS
+       ===================================================================== */
+    function renderOverview() {
+      const cur = getYearTotals(selectedYear);
+      const cmp = getYearTotals(compareYear);
+
+      // Compare same filled months for fair YTD YoY comparison
+      const filledIdxList = [];
+      for (let m = 0; m < 12; m++) {
+        if (hasMonthData(state.years[selectedYear][m])) filledIdxList.push(m);
+      }
+      const lastFilledMonth = filledIdxList.length ? filledIdxList[filledIdxList.length - 1] : 0;
+      const cmpSamePeriod = filledIdxList.reduce((acc, m) => acc + getMonthTotal(state.years[compareYear]?.[m]), 0);
+      const yoyPct = cmpSamePeriod > 0 ? ((cur.total - cmpSamePeriod) / cmpSamePeriod) * 100 : null;
+
+      // Latest month MoM
+      const latestVal = getMonthTotal(state.years[selectedYear][lastFilledMonth]);
+      const prevMonthVal = lastFilledMonth > 0
+        ? getMonthTotal(state.years[selectedYear][lastFilledMonth - 1])
+        : getMonthTotal(state.years[selectedYear - 1]?.[11]);
+      const momPct = prevMonthVal > 0 ? ((latestVal - prevMonthVal) / prevMonthVal) * 100 : null;
+
+      // Goal Attainment (realized months vs realized goals & annual)
+      const goalPctYtd = cur.realizedGoalTotal > 0 ? (cur.total / cur.realizedGoalTotal) * 100 : 0;
+      const goalPctAnnual = cur.goalTotal > 0 ? (cur.total / cur.goalTotal) * 100 : 0;
+      const goalGapYtd = cur.total - cur.realizedGoalTotal;
+
+      // Projected Year End (realized + remaining months estimated via YoY multiplier or average)
+      const avgMonthly = cur.filledMonths > 0 ? cur.total / cur.filledMonths : 0;
+      let projectedRemaining = 0;
+      const growthFactor = (cmpSamePeriod > 0 && cur.total > 0) ? (cur.total / cmpSamePeriod) : 1;
+      for (let m = 0; m < 12; m++) {
+        if (!hasMonthData(state.years[selectedYear][m])) {
+          const cmpM = getMonthTotal(state.years[compareYear]?.[m]);
+          projectedRemaining += cmpM > 0 ? cmpM * growthFactor : avgMonthly;
+        }
+      }
+      const projectedYearEnd = cur.total + projectedRemaining;
+      const projVsGoalPct = cur.goalTotal > 0 ? ((projectedYearEnd - cur.goalTotal) / cur.goalTotal) * 100 : null;
+
+      // Mix Anuidades vs Autos
+      const totalAnuid = cur.anuidades_pf + cur.anuidades_pj;
+      const anuidShare = cur.total > 0 ? (totalAnuid / cur.total) * 100 : 0;
+      const autosShare = cur.total > 0 ? (cur.autos_total / cur.total) * 100 : 0;
+
+      // Recovery Ratio ADM vs Dívida Ativa
+      const daShareAutos = cur.autos_total > 0 ? (cur.autos_da / cur.autos_total) * 100 : 0;
+      const admShareAutos = cur.autos_total > 0 ? (cur.autos_adm / cur.autos_total) * 100 : 0;
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Arrecadação Total (${selectedYear})</span><span>${cur.filledMonths}/12 meses</span></div>
+          <div class="kpi-value tabular">${fmtBRL(cur.total)}</div>
+          <div class="kpi-sub">${deltaBadge(yoyPct)} <span>vs ${compareYear} (mesmo período)</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Último Mês (${MONTHS_SHORT[lastFilledMonth]}/${selectedYear})</span><span>MoM</span></div>
+          <div class="kpi-value tabular">${fmtBRL(latestVal)}</div>
+          <div class="kpi-sub">${deltaBadge(momPct)} <span>Média mensal: ${fmtCompact(avgMonthly)}</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Atingimento da Meta (YTD)</span><span>${pctFmt.format(goalPctYtd)}%</span></div>
+          <div class="kpi-value tabular" style="color:${goalGapYtd >= 0 ? '#4ade80' : '#ff6b81'};">${goalGapYtd >= 0 ? '+' : ''}${fmtCompact(goalGapYtd)}</div>
+          <div class="kpi-sub"><span>Meta anual: ${fmtCompact(cur.goalTotal)} (${pctFmt.format(goalPctAnnual)}%)</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, goalPctAnnual)}%"></div></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Projeção Fechamento ${selectedYear}</span><span>Run-Rate</span></div>
+          <div class="kpi-value tabular">${fmtBRL(projectedYearEnd)}</div>
+          <div class="kpi-sub">${deltaBadge(projVsGoalPct)} <span>vs Meta Anual</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Mix: Anuidades vs Autos</span><span>Receita</span></div>
+          <div class="kpi-value tabular">${pctFmt.format(anuidShare)}% / ${pctFmt.format(autosShare)}%</div>
+          <div class="kpi-sub"><span>Anuidades: ${fmtCompact(totalAnuid)} · Autos: ${fmtCompact(cur.autos_total)}</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Autos: Adm. vs Dívida Ativa</span><span>Eficiência</span></div>
+          <div class="kpi-value tabular">${pctFmt.format(admShareAutos)}% / ${pctFmt.format(daShareAutos)}%</div>
+          <div class="kpi-sub"><span>Adm: ${fmtCompact(cur.autos_adm)} · D.A.: ${fmtCompact(cur.autos_da)}</span></div>
+        </div>
+      `;
+
+      renderMainEvolutionChart();
+      renderCategoryBreakdown(cur, cmp, filledIdxList);
+      renderAutoInsights(cur, cmp, filledIdxList, projectedYearEnd);
+    }
+
+    function renderMainEvolutionChart() {
+      const catInfo = overviewCategory === 'total'
+        ? { label: 'Total Geral Arrecadado', color: '#ff5e00' }
+        : CATEGORIES.find(c => c.key === overviewCategory);
+
+      document.getElementById('mainChartTitle').textContent = `Evolução Mensal — ${catInfo.label} (${selectedYear} vs ${compareYear})`;
+
+      const curVals = Array.from({ length: 12 }, (_, m) => getMetricValue(state.years[selectedYear]?.[m], overviewCategory));
+      const cmpVals = Array.from({ length: 12 }, (_, m) => getMetricValue(state.years[compareYear]?.[m], overviewCategory));
+      const goalVals = overviewCategory === 'total'
+        ? Array.from({ length: 12 }, (_, m) => parseNum(state.goals[selectedYear]?.[m]))
+        : Array(12).fill(0);
+
+      const maxVal = Math.max(1000, ...curVals, ...cmpVals, ...goalVals) * 1.14;
+      const W = 760, H = 290, padL = 64, padR = 16, padT = 18, padB = 34;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+      const step = plotW / 12;
+      const barW = Math.min(20, step * 0.34);
+
+      const yPos = v => padT + plotH - (v / maxVal) * plotH;
+
+      let gridHtml = '';
+      for (let i = 0; i <= 4; i++) {
+        const val = (maxVal / 4) * i;
+        const y = yPos(val);
+        gridHtml += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,110,50,0.12)" stroke-dasharray="${i === 0 ? '' : '3 4'}" />`;
+        gridHtml += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="#8f7772" font-size="10.5">${fmtCompact(val)}</text>`;
+      }
+
+      let barsHtml = '';
+      let goalPts = [];
+      for (let m = 0; m < 12; m++) {
+        const cx = padL + step * m + step / 2;
+        const hCmp = (cmpVals[m] / maxVal) * plotH;
+        const hCur = (curVals[m] / maxVal) * plotH;
+        const isCurM = isCurrentMonth(selectedYear, m);
+
+        if (isCurM) {
+          barsHtml += `<rect x="${padL + step * m + 3}" y="${padT}" width="${step - 6}" height="${plotH}" rx="6" fill="rgba(255,94,0,0.09)" />`;
+        }
+
+        // Compare year bar
+        barsHtml += `<rect x="${cx - barW - 2}" y="${yPos(cmpVals[m])}" width="${barW}" height="${Math.max(0, hCmp)}" rx="4" fill="rgba(255,176,120,0.22)" stroke="rgba(255,176,120,0.4)" stroke-width="0.8" class="bar-hover" data-m="${m}" />`;
+
+        // Selected year bar
+        barsHtml += `<rect x="${cx + 2}" y="${yPos(curVals[m])}" width="${barW}" height="${Math.max(0, hCur)}" rx="4" fill="url(#gradBarMain)" class="bar-hover" data-m="${m}" />`;
+
+        // X Label
+        barsHtml += `<text x="${cx}" y="${H - 12}" text-anchor="middle" fill="${isCurM ? '#ff9d5c' : '#b89f9a'}" font-size="11" font-weight="${isCurM ? '700' : '500'}">${MONTHS_SHORT[m]}</text>`;
+
+        if (goalVals[m] > 0) goalPts.push([cx, yPos(goalVals[m]), m]);
+      }
+
+      let goalLineHtml = '';
+      if (goalPts.length > 1) {
+        const d = goalPts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+        goalLineHtml = `<path d="${d}" fill="none" stroke="#ffb020" stroke-width="2.2" stroke-dasharray="5 4" />`;
+        goalPts.forEach(p => {
+          goalLineHtml += `<circle cx="${p[0]}" cy="${p[1]}" r="3.3" fill="#0d0708" stroke="#ffb020" stroke-width="2" />`;
+        });
+      }
+
+      // Interactive hover hit targets
+      let hitTargets = '';
+      for (let m = 0; m < 12; m++) {
+        hitTargets += `<rect x="${padL + step * m}" y="${padT}" width="${step}" height="${plotH}" fill="transparent" style="cursor:pointer;" data-hit-m="${m}" />`;
+      }
+
+      const svg = `
+        <svg class="chart-svg" viewBox="0 0 ${W} ${H}">
+          <defs>
+            <linearGradient id="gradBarMain" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff8c00" />
+              <stop offset="55%" stop-color="#ff4518" />
+              <stop offset="100%" stop-color="#ff1738" />
+            </linearGradient>
+          </defs>
+          ${gridHtml}
+          ${barsHtml}
+          ${goalLineHtml}
+          ${hitTargets}
+        </svg>
+      `;
+      const container = document.getElementById('mainEvolutionChart');
+      container.innerHTML = svg;
+
+      container.querySelectorAll('[data-hit-m]').forEach(el => {
+        const m = Number(el.dataset.hitM);
+        el.addEventListener('mouseenter', evt => {
+          const vCur = curVals[m], vCmp = cmpVals[m], vGoal = goalVals[m];
+          const yoy = vCmp > 0 ? ((vCur - vCmp) / vCmp) * 100 : null;
+          showTooltip(evt, `
+            <div style="font-weight:750;color:#ffb46e;margin-bottom:5px;">${MONTHS[m]} (${catInfo.label})</div>
+            <div>${selectedYear}: <strong class="mono">${fmtBRL(vCur)}</strong></div>
+            <div>${compareYear}: <span class="mono">${fmtBRL(vCmp)}</span></div>
+            ${yoy !== null ? `<div>Variação YoY: <strong style="color:${yoy >= 0 ? '#4ade80' : '#ff6b81'}">${fmtPct(yoy)}</strong></div>` : ''}
+            ${vGoal > 0 ? `<div>Meta ${selectedYear}: <span class="mono" style="color:#ffb020">${fmtBRL(vGoal)}</span></div>` : ''}
+            <div style="font-size:0.7rem;color:#8f7772;margin-top:4px;">Clique para editar este mês</div>
+          `);
+        });
+        el.addEventListener('mousemove', moveTooltip);
+        el.addEventListener('mouseleave', hideTooltip);
+        el.addEventListener('click', () => openEntryModal(selectedYear, m));
+      });
+
+      document.getElementById('mainChartLegend').innerHTML = `
+        <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(135deg,#ff1738,#ff8c00)"></span>${selectedYear} (Selecionado)</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:rgba(255,176,120,0.34)"></span>${compareYear} (Comparativo)</span>
+        ${overviewCategory === 'total' ? `<span class="legend-item"><span class="legend-swatch" style="background:#ffb020;height:3px;"></span>Meta Mensal ${selectedYear}</span>` : ''}
+      `;
+    }
+
+    function renderCategoryBreakdown(cur, cmp, filledIdxList) {
+      const container = document.getElementById('categoryBreakdown');
+      const total = cur.total || 1;
+      container.innerHTML = CATEGORIES.map(cat => {
+        const val = cur[cat.key];
+        const share = cur.total > 0 ? (val / total) * 100 : 0;
+        const cmpPeriod = filledIdxList.reduce((acc, m) => acc + getMetricValue(state.years[compareYear]?.[m], cat.key), 0);
+        const yoy = cmpPeriod > 0 ? ((val - cmpPeriod) / cmpPeriod) * 100 : null;
+        return `
+          <div>
+            <div class="cat-row-top">
+              <span class="cat-name">${escapeHtml(cat.label)}</span>
+              <span class="cat-val mono">${fmtBRL(val)}</span>
+            </div>
+            <div class="progress-track" style="height:7px;">
+              <div class="progress-fill" style="width:${Math.min(100, share)}%;background:${cat.color};"></div>
+            </div>
+            <div class="cat-meta">
+              <span>Participação: ${pctFmt.format(share)}% ${cat.computed ? '(soma Adm. + Dív. Ativa)' : ''}</span>
+              <span>${deltaBadge(yoy)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAutoInsights(cur, cmp, filledIdxList, projectedYearEnd) {
+      const grid = document.getElementById('autoInsightsGrid');
+      if (filledIdxList.length === 0) {
+        grid.innerHTML = `
+          <div class="insight-card">
+            <h4>Ano Pronto para Lançamentos</h4>
+            <p>O ano <strong>${selectedYear}</strong> ainda não possui valores realizados. Clique em <strong>+ Inserir Dados</strong> ou importe uma planilha/PDF na aba <strong>Importar</strong> para ativar os indicadores comparativos.</p>
+          </div>`;
+        return;
+      }
+
+      let bestM = filledIdxList[0], worstM = filledIdxList[0];
+      filledIdxList.forEach(m => {
+        if (getMonthTotal(state.years[selectedYear][m]) > getMonthTotal(state.years[selectedYear][bestM])) bestM = m;
+        if (getMonthTotal(state.years[selectedYear][m]) < getMonthTotal(state.years[selectedYear][worstM])) worstM = m;
+      });
+
+      // Fastest growing category YoY
+      let topCat = null, topGrowth = -Infinity, lagCat = null, lagGrowth = Infinity;
+      CATEGORIES.forEach(c => {
+        const curV = cur[c.key];
+        const cmpV = filledIdxList.reduce((acc, m) => acc + getMetricValue(state.years[compareYear]?.[m], c.key), 0);
+        if (cmpV > 0) {
+          const g = ((curV - cmpV) / cmpV) * 100;
+          if (g > topGrowth) { topGrowth = g; topCat = c; }
+          if (g < lagGrowth) { lagGrowth = g; lagCat = c; }
+        }
+      });
+
+      const q1Val = [0,1,2].reduce((a, m) => a + getMonthTotal(state.years[selectedYear][m]), 0);
+      const q1Share = cur.total > 0 ? (q1Val / cur.total) * 100 : 0;
+
+      const insights = [
+        {
+          title: 'Pico e Vale de Arrecadação',
+          body: `O melhor desempenho de ${selectedYear} foi em <strong>${MONTHS[bestM]}</strong> (${fmtBRL(getMonthTotal(state.years[selectedYear][bestM]))}), enquanto o menor volume ocorreu em <strong>${MONTHS[worstM]}</strong> (${fmtBRL(getMonthTotal(state.years[selectedYear][worstM]))}).`
+        },
+        {
+          title: topCat ? 'Motor de Crescimento YoY' : 'Base Comparativa',
+          body: topCat
+            ? `<strong>${topCat.label}</strong> lidera a expansão frente a ${compareYear} com <strong>${fmtPct(topGrowth)}</strong>. Já <strong>${lagCat.label}</strong> apresentou a menor variação (<strong>${fmtPct(lagGrowth)}</strong>).`
+            : `Cadastre dados em ${compareYear} para habilitar o ranking de crescimento por categoria.`
+        },
+        {
+          title: 'Concentração Sazonal (1º Trimestre)',
+          body: `O 1º trimestre respondeu por <strong>${pctFmt.format(q1Share)}%</strong> da receita acumulada (${fmtBRL(q1Val)}). Planejar campanhas de Dívida Ativa e cobrança no 2º semestre suaviza o fluxo de caixa.`
+        },
+        {
+          title: 'Tendência de Fechamento Anual',
+          body: `No ritmo atual (${cur.filledMonths} meses apurados), a projeção de fechamento para ${selectedYear} é de <strong>${fmtBRL(projectedYearEnd)}</strong>${cur.goalTotal > 0 ? ` frente à meta anual de ${fmtBRL(cur.goalTotal)}` : ''}.`
+        }
+      ];
+
+      grid.innerHTML = insights.map(ins => `
+        <div class="insight-card">
+          <h4>${ins.title}</h4>
+          <p>${ins.body}</p>
+        </div>
+      `).join('');
+    }
+
+    /* =====================================================================
+       7. TAB 2 — MONTHLY COMPARISON (MoM) & CRUD TABLE
+       ===================================================================== */
+    function renderMonthly() {
+      document.getElementById('monthlyTableTitle').textContent = `Lançamentos e Comparativo Mês a Mês — ${selectedYear} (vs ${compareYear})`;
+      renderMoMChart();
+
+      const table = document.getElementById('monthlyTable');
+      const curArr = state.years[selectedYear] || [];
+      const cmpArr = state.years[compareYear] || [];
+      const goals = state.goals[selectedYear] || [];
+
+      let rowsHtml = '';
+      let tot = { anuidades_pf: 0, anuidades_pj: 0, autos_adm: 0, autos_da: 0, autos_total: 0, total: 0, goal: 0 };
+
+      for (let m = 0; m < 12; m++) {
+        const r = normalizeRecord(curArr[m]);
+        const t = getMonthTotal(r);
+        const cmpT = getMonthTotal(cmpArr[m]);
+        const prevT = m > 0 ? getMonthTotal(curArr[m - 1]) : getMonthTotal(state.years[selectedYear - 1]?.[11]);
+        const mom = (hasMonthData(r) && prevT > 0) ? ((t - prevT) / prevT) * 100 : null;
+        const yoy = (hasMonthData(r) && cmpT > 0) ? ((t - cmpT) / cmpT) * 100 : null;
+        const g = parseNum(goals[m]);
+
+        tot.anuidades_pf += r.anuidades_pf;
+        tot.anuidades_pj += r.anuidades_pj;
+        tot.autos_adm += r.autos_adm;
+        tot.autos_da += r.autos_da;
+        tot.autos_total += r.autos_total;
+        tot.total += t;
+        tot.goal += g;
+
+        const isCur = isCurrentMonth(selectedYear, m);
+        const isFut = isFutureMonth(selectedYear, m);
+        let statusHtml = `<span class="status-badge status-future">Sem dados</span>`;
+        if (isFut && !hasMonthData(r)) {
+          statusHtml = `<span class="status-badge status-future">Próximo</span>`;
+        } else if (hasMonthData(r) && g > 0) {
+          const ratio = t / g;
+          if (ratio >= 1) statusHtml = `<span class="status-badge status-hit">Meta OK (${pctFmt.format(ratio * 100)}%)</span>`;
+          else if (ratio >= 0.9) statusHtml = `<span class="status-badge status-warn">Atenção (${pctFmt.format(ratio * 100)}%)</span>`;
+          else statusHtml = `<span class="status-badge status-miss">Abaixo (${pctFmt.format(ratio * 100)}%)</span>`;
+        } else if (hasMonthData(r)) {
+          statusHtml = `<span class="status-badge status-hit">Lançado</span>`;
+        }
+
+        rowsHtml += `
+          <tr class="${isCur ? 'current-month-row' : ''} ${isFut && !hasMonthData(r) ? 'future-month-row' : ''}">
+            <td>
+              <strong>${MONTHS[m]}</strong>
+              ${isCur ? '<span style="font-size:0.66rem;background:#ff5e00;color:#fff;padding:1px 5px;border-radius:4px;margin-left:5px;">ATUAL</span>' : ''}
+            </td>
+            <td class="num mono">${fmtBRL(r.anuidades_pf)}</td>
+            <td class="num mono">${fmtBRL(r.anuidades_pj)}</td>
+            <td class="num mono">${fmtBRL(r.autos_adm)}</td>
+            <td class="num mono">${fmtBRL(r.autos_da)}</td>
+            <td class="num mono" style="color:#ff9d70;font-weight:700;">${fmtBRL(r.autos_total)}</td>
+            <td class="num mono" style="font-weight:800;color:#fff;">${fmtBRL(t)}</td>
+            <td class="num">${deltaBadge(mom)}</td>
+            <td class="num">${deltaBadge(yoy)}</td>
+            <td class="num mono" style="color:#ffb020;">${g > 0 ? fmtBRL(g) : '—'}</td>
+            <td>${statusHtml}</td>
+            <td class="no-print">
+              <div style="display:flex;gap:5px;justify-content:flex-end;">
+                <button class="btn btn-secondary btn-icon" data-edit-m="${m}" title="Inserir ou editar dados">Editar</button>
+                <button class="btn btn-danger btn-icon" data-del-m="${m}" title="Excluir dados deste mês">Excluir</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th class="num">Anuid. Farm./Téc.</th>
+            <th class="num">Anuid. Pessoa Jurídica</th>
+            <th class="num">Autos Adm.</th>
+            <th class="num">Autos Dív. Ativa</th>
+            <th class="num">Autos (ADM+DA)</th>
+            <th class="num">Total Geral</th>
+            <th class="num">MoM %</th>
+            <th class="num">YoY %</th>
+            <th class="num">Meta</th>
+            <th>Status</th>
+            <th class="num no-print">Ações</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+        <tfoot>
+          <tr>
+            <td>TOTAL ${selectedYear}</td>
+            <td class="num mono">${fmtBRL(tot.anuidades_pf)}</td>
+            <td class="num mono">${fmtBRL(tot.anuidades_pj)}</td>
+            <td class="num mono">${fmtBRL(tot.autos_adm)}</td>
+            <td class="num mono">${fmtBRL(tot.autos_da)}</td>
+            <td class="num mono">${fmtBRL(tot.autos_total)}</td>
+            <td class="num mono">${fmtBRL(tot.total)}</td>
+            <td class="num">—</td>
+            <td class="num">—</td>
+            <td class="num mono">${fmtBRL(tot.goal)}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      `;
+
+      table.querySelectorAll('[data-edit-m]').forEach(btn => {
+        btn.addEventListener('click', () => openEntryModal(selectedYear, Number(btn.dataset.editM)));
+      });
+      table.querySelectorAll('[data-del-m]').forEach(btn => {
+        btn.addEventListener('click', () => deleteMonthEntry(selectedYear, Number(btn.dataset.delM)));
+      });
+    }
+
+    function renderMoMChart() {
+      const vals = Array.from({ length: 12 }, (_, m) => getMetricValue(state.years[selectedYear]?.[m], momCategory));
+      const decPrev = getMetricValue(state.years[selectedYear - 1]?.[11], momCategory);
+      const deltas = vals.map((v, m) => {
+        const prev = m === 0 ? decPrev : vals[m - 1];
+        if (v <= 0 || prev <= 0) return null;
+        return ((v - prev) / prev) * 100;
+      });
+
+      const validAbs = deltas.filter(d => d !== null).map(Math.abs);
+      const maxAbs = Math.max(20, ...validAbs) * 1.18;
+      const W = 900, H = 215, padL = 54, padR = 16, padT = 18, padB = 30;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const zeroY = padT + plotH / 2;
+      const step = plotW / 12;
+      const barW = Math.min(34, step * 0.54);
+
+      let svgParts = `<line x1="${padL}" y1="${zeroY}" x2="${W - padR}" y2="${zeroY}" stroke="rgba(255,150,80,0.45)" stroke-width="1.2" />`;
+      [-maxAbs, -maxAbs / 2, 0, maxAbs / 2, maxAbs].forEach(v => {
+        const y = zeroY - (v / maxAbs) * (plotH / 2);
+        svgParts += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,110,50,0.1)" stroke-dasharray="3 4" />`;
+        svgParts += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="#8f7772" font-size="10">${Math.round(v)}%</text>`;
+      });
+
+      for (let m = 0; m < 12; m++) {
+        const cx = padL + step * m + step / 2;
+        const d = deltas[m];
+        if (d !== null) {
+          const h = (Math.abs(d) / maxAbs) * (plotH / 2);
+          const y = d >= 0 ? zeroY - h : zeroY;
+          const fill = d >= 0 ? 'url(#gradMomUp)' : 'url(#gradMomDown)';
+          svgParts += `<rect x="${cx - barW / 2}" y="${y}" width="${barW}" height="${Math.max(2, h)}" rx="4" fill="${fill}" />`;
+          svgParts += `<text x="${cx}" y="${d >= 0 ? y - 5 : y + h + 12}" text-anchor="middle" fill="${d >= 0 ? '#ffb870' : '#ff6b81'}" font-size="9.5" font-weight="700">${fmtPct(d)}</text>`;
+        }
+        svgParts += `<text x="${cx}" y="${H - 8}" text-anchor="middle" fill="#b89f9a" font-size="11">${MONTHS_SHORT[m]}</text>`;
+        svgParts += `<rect x="${padL + step * m}" y="${padT}" width="${step}" height="${plotH}" fill="transparent" data-mom-m="${m}" />`;
+      }
+
+      const el = document.getElementById('momChart');
+      el.innerHTML = `
+        <svg class="chart-svg" viewBox="0 0 ${W} ${H}">
+          <defs>
+            <linearGradient id="gradMomUp" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffb020"/><stop offset="100%" stop-color="#ff5e00"/>
+            </linearGradient>
+            <linearGradient id="gradMomDown" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff1e3c"/><stop offset="100%" stop-color="#8b0018"/>
+            </linearGradient>
+          </defs>
+          ${svgParts}
+        </svg>
+      `;
+
+      el.querySelectorAll('[data-mom-m]').forEach(r => {
+        const m = Number(r.dataset.momM);
+        r.addEventListener('mouseenter', evt => {
+          const prevLabel = m === 0 ? `Dez/${selectedYear - 1}` : `${MONTHS_SHORT[m - 1]}/${selectedYear}`;
+          const prevVal = m === 0 ? decPrev : vals[m - 1];
+          showTooltip(evt, `
+            <div style="font-weight:750;color:#ffb46e;margin-bottom:4px;">${MONTHS[m]}/${selectedYear} vs ${prevLabel}</div>
+            <div>Atual: <strong class="mono">${fmtBRL(vals[m])}</strong></div>
+            <div>Anterior: <span class="mono">${fmtBRL(prevVal)}</span></div>
+            <div>Variação MoM: <strong>${deltas[m] !== null ? fmtPct(deltas[m]) : 'Sem base'}</strong></div>
+          `);
+        });
+        r.addEventListener('mousemove', moveTooltip);
+        r.addEventListener('mouseleave', hideTooltip);
+      });
+    }
+
+    /* =====================================================================
+       8. TAB 3 — ANNUAL COMPARISON (2023 -> 2026 -> FUTURE)
+       ===================================================================== */
+    function renderAnnual() {
+      const years = getSortedYears();
+      const yearSums = {};
+      years.forEach(y => { yearSums[y] = getYearTotals(y); });
+
+      // Multi-year Bar Chart
+      const vals = years.map(y => annualCategory === 'total' ? yearSums[y].total : yearSums[y][annualCategory]);
+      const goalVals = years.map(y => annualCategory === 'total' ? yearSums[y].goalTotal : 0);
+      const maxVal = Math.max(1000, ...vals, ...goalVals) * 1.16;
+
+      const W = 900, H = 280, padL = 70, padR = 24, padT = 22, padB = 38;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const step = plotW / Math.max(1, years.length);
+      const barW = Math.min(54, step * 0.36);
+      const yPos = v => padT + plotH - (v / maxVal) * plotH;
+
+      let grid = '';
+      for (let i = 0; i <= 4; i++) {
+        const v = (maxVal / 4) * i;
+        const y = yPos(v);
+        grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,110,50,0.12)" stroke-dasharray="${i === 0 ? '' : '3 4'}" />`;
+        grid += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="#8f7772" font-size="10.5">${fmtCompact(v)}</text>`;
+      }
+
+      let bars = '';
+      let trendPts = [];
+      years.forEach((y, idx) => {
+        const cx = padL + step * idx + step / 2;
+        const v = vals[idx];
+        const g = goalVals[idx];
+        const h = (v / maxVal) * plotH;
+        const hG = (g / maxVal) * plotH;
+
+        if (g > 0) {
+          bars += `<rect x="${cx - barW / 2 - 4}" y="${yPos(g)}" width="${barW + 8}" height="${Math.max(0, hG)}" rx="7" fill="none" stroke="rgba(255,176,32,0.5)" stroke-dasharray="4 3" stroke-width="1.3" />`;
+        }
+        bars += `<rect x="${cx - barW / 2}" y="${yPos(v)}" width="${barW}" height="${Math.max(0, h)}" rx="7" fill="url(#gradAnnual)" />`;
+        bars += `<text x="${cx}" y="${Math.max(14, yPos(v) - 7)}" text-anchor="middle" fill="#ffd9c4" font-size="11" font-weight="750">${v > 0 ? fmtCompact(v) : 'Planej.'}</text>`;
+        bars += `<text x="${cx}" y="${H - 12}" text-anchor="middle" fill="${y === selectedYear ? '#ff8c00' : '#cbb5b0'}" font-size="12" font-weight="750">${y}${y > CURRENT_YEAR ? '*' : ''}</text>`;
+        bars += `<rect x="${padL + step * idx}" y="${padT}" width="${step}" height="${plotH}" fill="transparent" style="cursor:pointer;" data-ann-y="${y}" />`;
+        if (v > 0) trendPts.push([cx, yPos(v)]);
+      });
+
+      let trendLine = '';
+      if (trendPts.length > 1) {
+        trendLine = `<path d="${trendPts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1]}`).join(' ')}" fill="none" stroke="#ffb020" stroke-width="2.2" />`;
+        trendPts.forEach(p => { trendLine += `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#12090a" stroke="#ffb020" stroke-width="2.2" />`; });
+      }
+
+      const chartEl = document.getElementById('annualBarChart');
+      chartEl.innerHTML = `
+        <svg class="chart-svg" viewBox="0 0 ${W} ${H}">
+          <defs>
+            <linearGradient id="gradAnnual" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff9a00"/><stop offset="50%" stop-color="#ff4d12"/><stop offset="100%" stop-color="#d90429"/>
+            </linearGradient>
+          </defs>
+          ${grid}${bars}${trendLine}
+        </svg>
+      `;
+
+      chartEl.querySelectorAll('[data-ann-y]').forEach(el => {
+        const y = Number(el.dataset.annY);
+        el.addEventListener('mouseenter', evt => {
+          const idx = years.indexOf(y);
+          const v = vals[idx], prevV = idx > 0 ? vals[idx - 1] : 0;
+          const yoy = prevV > 0 && v > 0 ? ((v - prevV) / prevV) * 100 : null;
+          showTooltip(evt, `
+            <div style="font-weight:750;color:#ffb46e;margin-bottom:4px;">Ano ${y} (${yearSums[y].filledMonths}/12 meses)</div>
+            <div>Realizado: <strong class="mono">${fmtBRL(v)}</strong></div>
+            ${goalVals[idx] > 0 ? `<div>Meta Anual: <span class="mono" style="color:#ffb020">${fmtBRL(goalVals[idx])}</span></div>` : ''}
+            ${yoy !== null ? `<div>YoY vs ${years[idx - 1]}: <strong>${fmtPct(yoy)}</strong></div>` : ''}
+          `);
+        });
+        el.addEventListener('mousemove', moveTooltip);
+        el.addEventListener('mouseleave', hideTooltip);
+        el.addEventListener('click', () => { selectedYear = y; renderAll(); });
+      });
+
+      document.getElementById('annualChartLegend').innerHTML = `
+        <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(135deg,#d90429,#ff9a00)"></span>Arrecadação Realizada</span>
+        ${annualCategory === 'total' ? `<span class="legend-item"><span class="legend-swatch" style="border:1.5px dashed #ffb020;background:transparent"></span>Meta Anual</span>` : ''}
+        <span class="legend-item"><span class="legend-swatch" style="background:#ffb020;height:3px;"></span>Tendência Histórica</span>
+      `;
+
+      // Annual Matrix Table
+      const matrixRows = [...CATEGORIES, { key: 'total', label: 'TOTAL GERAL ARRECADADO', isTotal: true }];
+      const populatedYears = years.filter(y => yearSums[y].total > 0);
+      const firstPop = populatedYears[0], lastPop = populatedYears[populatedYears.length - 1];
+
+      const headCols = years.map(y => `<th class="num">${y} (${yearSums[y].filledMonths}m)</th>`).join('');
+      const yoyCols = years.slice(1).map((y, i) => `<th class="num">${String(y).slice(2)}/${String(years[i]).slice(2)}</th>`).join('');
+
+      const bodyHtml = matrixRows.map(row => {
+        const valCells = years.map(y => {
+          const v = row.isTotal ? yearSums[y].total : yearSums[y][row.key];
+          return `<td class="num mono">${v > 0 ? fmtBRL(v) : '—'}</td>`;
+        }).join('');
+        const deltaCells = years.slice(1).map((y, i) => {
+          const curV = row.isTotal ? yearSums[y].total : yearSums[y][row.key];
+          const prevV = row.isTotal ? yearSums[years[i]].total : yearSums[years[i]][row.key];
+          const pct = (curV > 0 && prevV > 0) ? ((curV - prevV) / prevV) * 100 : null;
+          return `<td class="num">${deltaBadge(pct)}</td>`;
+        }).join('');
+
+        let cagrHtml = '—';
+        if (firstPop && lastPop && lastPop > firstPop) {
+          const v0 = row.isTotal ? yearSums[firstPop].total : yearSums[firstPop][row.key];
+          const v1 = row.isTotal ? yearSums[lastPop].total : yearSums[lastPop][row.key];
+          if (v0 > 0 && v1 > 0) {
+            const cagr = (Math.pow(v1 / v0, 1 / (lastPop - firstPop)) - 1) * 100;
+            cagrHtml = deltaBadge(cagr);
+          }
+        }
+        const trStyle = row.isTotal ? 'style="background:rgba(255,64,20,0.16);font-weight:800;"' : '';
+        return `<tr ${trStyle}><td><strong>${escapeHtml(row.label)}</strong></td>${valCells}${deltaCells}<td class="num">${cagrHtml}</td></tr>`;
+      }).join('');
+
+      document.getElementById('annualMatrixTable').innerHTML = `
+        <thead><tr><th>Campo Comparativo</th>${headCols}${yoyCols}<th class="num">CAGR</th></tr></thead>
+        <tbody>${bodyHtml}</tbody>
+      `;
+
+      // Month x Year Heatmap Table
+      let maxCell = 1;
+      years.forEach(y => {
+        for (let m = 0; m < 12; m++) maxCell = Math.max(maxCell, getMonthTotal(state.years[y][m]));
+      });
+
+      const hmHead = `<thead><tr><th>Mês</th>${years.map(y => `<th class="num">${y}</th>`).join('')}<th class="num">Média Histórica</th></tr></thead>`;
+      const hmBody = MONTHS.map((mName, m) => {
+        let sumM = 0, cntM = 0;
+        const cells = years.map(y => {
+          const v = getMonthTotal(state.years[y][m]);
+          if (v > 0) { sumM += v; cntM++; }
+          const intensity = v > 0 ? 0.12 + (v / maxCell) * 0.56 : 0;
+          const bg = v > 0 ? `rgba(255, ${Math.round(125 - (v / maxCell) * 95)}, 18, ${intensity.toFixed(2)})` : 'transparent';
+          return `<td class="num"><div class="heatmap-cell mono" style="background:${bg};color:${v > 0 ? '#fff' : '#6c5652'};">${v > 0 ? fmtCompact(v) : '—'}</div></td>`;
+        }).join('');
+        return `<tr><td><strong>${mName}</strong></td>${cells}<td class="num mono" style="color:#ffb46e;font-weight:700;">${cntM > 0 ? fmtCompact(sumM / cntM) : '—'}</td></tr>`;
+      }).join('');
+      document.getElementById('monthYearHeatmap').innerHTML = hmHead + `<tbody>${hmBody}</tbody>`;
+    }
+
+    /* =====================================================================
+       9. TAB 4 — GOALS SYSTEM & SOLUTIONS FOR UNMET GOALS
+       ===================================================================== */
+    function analyzeGoals(year) {
+      const goals = state.goals[year] || Array(12).fill(0);
+      const recs = state.years[year] || [];
+      const cmpRecs = state.years[year - 1] || [];
+
+      let totalGoal = 0, totalRealized = 0, realizedGoalSum = 0;
+      let hitCount = 0, missCount = 0, futureCount = 0;
+      const missedMonths = [];
+      const remainingMonths = [];
+
+      for (let m = 0; m < 12; m++) {
+        const g = parseNum(goals[m]);
+        const r = normalizeRecord(recs[m]);
+        const t = getMonthTotal(r);
+        totalGoal += g;
+        totalRealized += t;
+
+        if (hasMonthData(r)) {
+          realizedGoalSum += g;
+          if (g > 0) {
+            if (t >= g) hitCount++;
+            else {
+              missCount++;
+              // Estimate category deficits vs prior year scaled to goal
+              const cmpM = normalizeRecord(cmpRecs[m]);
+              const cmpTotal = getMonthTotal(cmpM);
+              const catDeficits = [];
+              const weights = cmpTotal > 0
+                ? { anuidades_pf: cmpM.anuidades_pf / cmpTotal, anuidades_pj: cmpM.anuidades_pj / cmpTotal, autos_adm: cmpM.autos_adm / cmpTotal, autos_da: cmpM.autos_da / cmpTotal }
+                : { anuidades_pf: 0.44, anuidades_pj: 0.38, autos_adm: 0.10, autos_da: 0.08 };
+
+              ['anuidades_pf', 'anuidades_pj', 'autos_adm', 'autos_da'].forEach(k => {
+                const targetK = g * weights[k];
+                const diff = r[k] - targetK;
+                if (diff < -100) {
+                  catDeficits.push({ key: k, label: CATEGORIES.find(c => c.key === k).label, realized: r[k], expected: targetK, deficit: Math.abs(diff) });
+                }
+              });
+              catDeficits.sort((a, b) => b.deficit - a.deficit);
+              missedMonths.push({ month: m, realized: t, goal: g, deficit: g - t, pct: (t / g) * 100, catDeficits });
+            }
+          }
+        } else {
+          futureCount++;
+          remainingMonths.push({ month: m, goal: g });
+        }
+      }
+
+      const cumulativeDeficit = Math.max(0, realizedGoalSum - totalRealized);
+      const extraPerRemainingMonth = remainingMonths.length > 0 ? cumulativeDeficit / remainingMonths.length : cumulativeDeficit;
+
+      return { totalGoal, totalRealized, realizedGoalSum, hitCount, missCount, futureCount, missedMonths, remainingMonths, cumulativeDeficit, extraPerRemainingMonth };
+    }
+
+    const ACTION_PLAYBOOKS = {
+      anuidades_pf: [
+        'Ativar régua de cobrança omnichannel (WhatsApp + E-mail + SMS) com boleto e QR Code PIX para quitação imediata.',
+        'Lançar campanha de parcelamento escalonado (REFIS/negociação online) para profissionais inadimplentes dos últimos 2 exercícios.',
+        'Saneamento cadastral de farmacêuticos e técnicos com notificações devolvidas para ampliar a base alcançável.'
+      ],
+      anuidades_pj: [
+        'Priorizar abordagem consultiva para redes e estabelecimentos de maior faixa de capital social em atraso (Curva ABC).',
+        'Integrar alertas de pendência financeira à renovação da Certidão de Regularidade Técnica (CRT).',
+        'Realizar mutirão digital de regularização PJ com facilitação de entrada e compensação rápida.'
+      ],
+      autos_adm: [
+        'Acelerar o julgamento e a expedição de notificações de processos administrativos parados em fila de análise.',
+        'Reorientar rotas de fiscalização para regiões e estabelecimentos com maior histórico de reincidência.',
+        'Divulgar de forma clara o benefício de desconto legal para quitação na fase administrativa sem recurso.'
+      ],
+      autos_da: [
+        'Intensificar o envio de Certidões de Dívida Ativa (CDAs) a protesto extrajudicial em cartório (maior taxa de liquidez rápida).',
+        'Promover campanha de conciliação de Dívida Ativa com redução escalonada de juros e multa moratória.',
+        'Auditar a carteira de CDAs próximas da prescrição para priorizar cobrança amigável e ajuizamento imediato.'
+      ]
+    };
+
+    function renderGoals() {
+      const analysis = analyzeGoals(selectedYear);
+      document.getElementById('missedGoalsBadge').textContent = analysis.missCount;
+      document.getElementById('goalEditorYearLabel').textContent = selectedYear;
+
+      const ytdPct = analysis.realizedGoalSum > 0 ? (analysis.totalRealized / analysis.realizedGoalSum) * 100 : 0;
+
+      document.getElementById('goalsKpiGrid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Meta Anual ${selectedYear}</span><span>12 meses</span></div>
+          <div class="kpi-value tabular">${fmtBRL(analysis.totalGoal)}</div>
+          <div class="kpi-sub"><span>Realizado acumulado: ${fmtCompact(analysis.totalRealized)}</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Eficiência YTD vs Meta</span><span>Atingimento</span></div>
+          <div class="kpi-value tabular" style="color:${ytdPct >= 100 ? '#4ade80' : '#ff9800'}">${pctFmt.format(ytdPct)}%</div>
+          <div class="kpi-sub"><span>${analysis.hitCount} meses atingidos · ${analysis.missCount} abaixo</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Déficit Acumulado (YTD)</span><span>Gap</span></div>
+          <div class="kpi-value tabular" style="color:${analysis.cumulativeDeficit > 0 ? '#ff4d6d' : '#4ade80'}">${analysis.cumulativeDeficit > 0 ? '-' + fmtBRL(analysis.cumulativeDeficit) : 'Meta Superada'}</div>
+          <div class="kpi-sub"><span>${analysis.futureCount} meses futuros abertos</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><span>Esforço Extra de Recuperação</span><span>Próximos Meses</span></div>
+          <div class="kpi-value tabular" style="color:#ffb020;">+${fmtBRL(analysis.extraPerRemainingMonth)}</div>
+          <div class="kpi-sub"><span>Adicional necessário por mês restante</span></div>
+        </div>
+      `;
+
+      renderGoalsChart();
+      renderSolutions(analysis);
+      renderGoalsEditor();
+    }
+
+    function renderGoalsChart() {
+      const goals = state.goals[selectedYear] || Array(12).fill(0);
+      const realized = Array.from({ length: 12 }, (_, m) => getMonthTotal(state.years[selectedYear]?.[m]));
+      const maxVal = Math.max(1000, ...goals, ...realized) * 1.15;
+
+      const W = 900, H = 250, padL = 66, padR = 16, padT = 18, padB = 32;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const step = plotW / 12, barW = Math.min(22, step * 0.34);
+      const yPos = v => padT + plotH - (v / maxVal) * plotH;
+
+      let grid = '';
+      for (let i = 0; i <= 4; i++) {
+        const v = (maxVal / 4) * i, y = yPos(v);
+        grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,110,50,0.12)" stroke-dasharray="${i === 0 ? '' : '3 4'}" />`;
+        grid += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="#8f7772" font-size="10">${fmtCompact(v)}</text>`;
+      }
+
+      let bars = '';
+      for (let m = 0; m < 12; m++) {
+        const cx = padL + step * m + step / 2;
+        const g = parseNum(goals[m]), r = realized[m];
+        const hit = r >= g && g > 0;
+        const rFill = r === 0 ? 'rgba(255,255,255,0.08)' : (hit ? 'url(#gradGoalHit)' : 'url(#gradGoalMiss)');
+
+        bars += `<rect x="${cx - barW - 2}" y="${yPos(g)}" width="${barW}" height="${Math.max(0, (g / maxVal) * plotH)}" rx="4" fill="rgba(255,176,32,0.26)" stroke="#ffb020" stroke-width="1" />`;
+        bars += `<rect x="${cx + 2}" y="${yPos(r)}" width="${barW}" height="${Math.max(0, (r / maxVal) * plotH)}" rx="4" fill="${rFill}" />`;
+        bars += `<text x="${cx}" y="${H - 10}" text-anchor="middle" fill="${isFutureMonth(selectedYear, m) ? '#8f7772' : '#d7c2bd'}" font-size="11">${MONTHS_SHORT[m]}</text>`;
+        bars += `<rect x="${padL + step * m}" y="${padT}" width="${step}" height="${plotH}" fill="transparent" data-gm="${m}" />`;
+      }
+
+      const box = document.getElementById('goalsComparisonChart');
+      box.innerHTML = `
+        <svg class="chart-svg" viewBox="0 0 ${W} ${H}">
+          <defs>
+            <linearGradient id="gradGoalHit" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9800"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>
+            <linearGradient id="gradGoalMiss" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff5e00"/><stop offset="100%" stop-color="#ff1738"/></linearGradient>
+          </defs>
+          ${grid}${bars}
+        </svg>
+      `;
+
+      box.querySelectorAll('[data-gm]').forEach(el => {
+        const m = Number(el.dataset.gm);
+        el.addEventListener('mouseenter', evt => {
+          const g = parseNum(goals[m]), r = realized[m], diff = r - g;
+          showTooltip(evt, `
+            <div style="font-weight:750;color:#ffb46e;margin-bottom:4px;">${MONTHS[m]}/${selectedYear}</div>
+            <div>Meta: <span class="mono" style="color:#ffb020">${fmtBRL(g)}</span></div>
+            <div>Realizado: <strong class="mono">${fmtBRL(r)}</strong></div>
+            ${r > 0 && g > 0 ? `<div>Desvio: <strong style="color:${diff >= 0 ? '#4ade80' : '#ff6b81'}">${diff >= 0 ? '+' : ''}${fmtBRL(diff)} (${pctFmt.format((r / g) * 100)}%)</strong></div>` : '<div style="color:#8f7772;">Mês futuro / em aberto</div>'}
+          `);
+        });
+        el.addEventListener('mousemove', moveTooltip);
+        el.addEventListener('mouseleave', hideTooltip);
+      });
+
+      document.getElementById('goalsChartLegend').innerHTML = `
+        <span class="legend-item"><span class="legend-swatch" style="background:rgba(255,176,32,0.4);border:1px solid #ffb020"></span>Meta Definida</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(135deg,#22c55e,#ff9800)"></span>Realizado (Meta Atingida)</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(135deg,#ff1738,#ff5e00)"></span>Realizado (Abaixo da Meta)</span>
+      `;
+    }
+
+    function renderSolutions(analysis) {
+      const box = document.getElementById('solutionsContainer');
+      if (analysis.missedMonths.length === 0) {
+        box.innerHTML = `
+          <div class="insight-card" style="border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.08);">
+            <h4 style="color:#4ade80;">Todas as Metas Apuradas Foram Alcançadas em ${selectedYear}</h4>
+            <p>Nenhum mês realizado apresentou déficit frente à meta cadastrada. Continue acompanhando os próximos meses ou eleve o crescimento alvo para desafiar o resultado anual.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Sort biggest deficits first
+      const sorted = [...analysis.missedMonths].sort((a, b) => b.deficit - a.deficit);
+      box.innerHTML = sorted.map(item => {
+        const severity = item.pct < 85 ? 'Crítico' : (item.pct < 93 ? 'Alto Impacto' : 'Moderado');
+        const mainCat = item.catDeficits[0];
+        const secondaryCat = item.catDeficits[1];
+
+        const recs = [];
+        if (mainCat && ACTION_PLAYBOOKS[mainCat.key]) {
+          recs.push(...ACTION_PLAYBOOKS[mainCat.key].slice(0, 2).map(t => `<strong>${mainCat.label}:</strong> ${t}`));
+        }
+        if (secondaryCat && ACTION_PLAYBOOKS[secondaryCat.key]) {
+          recs.push(`<strong>${secondaryCat.label}:</strong> ${ACTION_PLAYBOOKS[secondaryCat.key][0]}`);
+        }
+        if (analysis.remainingMonths.length > 0) {
+          const perRem = item.deficit / analysis.remainingMonths.length;
+          recs.push(`<strong>Reequilíbrio de Caixa:</strong> Redistribuir <strong>+${fmtBRL(perRem)}/mês</strong> nos ${analysis.remainingMonths.length} meses restantes de ${selectedYear} (${analysis.remainingMonths.map(x => MONTHS_SHORT[x.month]).join(', ')}) para neutralizar integralmente este desvio.`);
+        } else {
+          recs.push(`<strong>Compensação no Próximo Exercício:</strong> Incorporar plano de recuperação de ${fmtBRL(item.deficit)} via campanha de Dívida Ativa no 1º trimestre de ${selectedYear + 1}.`);
+        }
+
+        return `
+          <div class="solution-card">
+            <div class="solution-header">
+              <div>
+                <span class="status-badge status-miss" style="margin-right:8px;">${severity}</span>
+                <strong style="font-size:0.95rem;">${MONTHS[item.month]}/${selectedYear} — Déficit de ${fmtBRL(item.deficit)}</strong>
+              </div>
+              <div class="mono" style="font-size:0.8rem;color:#ffb8a0;">
+                Realizado: ${fmtBRL(item.realized)} / Meta: ${fmtBRL(item.goal)} (${pctFmt.format(item.pct)}%)
+              </div>
+            </div>
+            <div class="helper-note">
+              ${item.catDeficits.length ? `Principais vetores da queda: ${item.catDeficits.slice(0, 2).map(c => `<strong>${c.label}</strong> (-${fmtCompact(c.deficit)})`).join(' e ')}.` : 'Desvio distribuído entre os componentes de receita.'}
+            </div>
+            <ul class="solution-actions">
+              ${recs.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderGoalsEditor() {
+      const goals = state.goals[selectedYear] || Array(12).fill(0);
+      const recs = state.years[selectedYear] || [];
+      const tbl = document.getElementById('goalsEditorTable');
+
+      const rows = MONTHS.map((name, m) => {
+        const g = parseNum(goals[m]);
+        const r = getMonthTotal(recs[m]);
+        const gap = r > 0 ? r - g : null;
+        const fut = isFutureMonth(selectedYear, m);
+        return `
+          <tr>
+            <td><strong>${name}/${selectedYear}</strong> ${fut ? '<span class="status-badge status-future" style="margin-left:5px;">Próximo Mês</span>' : ''}</td>
+            <td class="num mono">${r > 0 ? fmtBRL(r) : '—'}</td>
+            <td>
+              <input type="text" class="input input-sm mono" data-goal-input="${m}" value="${fmtInputVal(g)}" style="max-width:170px;text-align:right;" />
+            </td>
+            <td class="num mono" style="color:${gap === null ? '#8f7772' : (gap >= 0 ? '#4ade80' : '#ff6b81')};">
+              ${gap === null ? 'Aguardando' : (gap >= 0 ? '+' : '') + fmtBRL(gap)}
+            </td>
+            <td class="num">
+              <button class="btn btn-secondary btn-sm" data-save-goal="${m}">Salvar</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbl.innerHTML = `
+        <thead><tr><th>Mês</th><th class="num">Realizado</th><th>Meta Mensal (R$)</th><th class="num">Desvio</th><th class="num">Ação</th></tr></thead>
+        <tbody>${rows}</tbody>
+      `;
+
+      tbl.querySelectorAll('[data-save-goal]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const m = Number(btn.dataset.saveGoal);
+          const inp = tbl.querySelector(`[data-goal-input="${m}"]`);
+          state.goals[selectedYear][m] = parseNum(inp.value);
+          saveState();
+          renderAll();
+          showToast(`Meta de ${MONTHS[m]}/${selectedYear} atualizada.`, 'success');
+        });
+      });
+    }
+
+    /* =====================================================================
+       10. TAB 5 — INTELLIGENT IMPORT (XLSX, PDF, GOOGLE DRIVE, RAW TEXT)
+       ===================================================================== */
+    function renderDriveLinks() {
+      const box = document.getElementById('savedDriveLinksList');
+      const list = state.driveLinks || [];
+      if (!list.length) {
+        box.innerHTML = `<div class="helper-note">Nenhum link do Google Drive salvo ainda. Cole uma URL acima e clique em <strong>Salvar Link</strong> ou <strong>Ler e Extrair do Drive</strong>.</div>`;
+        return;
+      }
+      box.innerHTML = list.map((item, idx) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,86,36,0.07);border:1px solid rgba(255,98,36,0.2);margin-bottom:8px;">
+          <div style="min-width:0;">
+            <div style="font-weight:700;font-size:0.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.label || 'Arquivo Google Drive')}</div>
+            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.74rem;color:#ff9d5c;text-decoration:none;word-break:break-all;">${escapeHtml(item.url)}</a>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn-secondary btn-sm" data-reimport-drive="${idx}">Extrair</button>
+            <button class="btn btn-danger btn-sm" data-del-drive="${idx}">Excluir</button>
+          </div>
+        </div>
+      `).join('');
+
+      box.querySelectorAll('[data-reimport-drive]').forEach(b => {
+        b.addEventListener('click', () => {
+          const item = state.driveLinks[Number(b.dataset.reimportDrive)];
+          document.getElementById('driveUrlInput').value = item.url;
+          document.getElementById('driveLabelInput').value = item.label;
+          handleDriveImport();
+        });
+      });
+      box.querySelectorAll('[data-del-drive]').forEach(b => {
+        b.addEventListener('click', () => {
+          state.driveLinks.splice(Number(b.dataset.delDrive), 1);
+          saveState();
+          renderDriveLinks();
+          showToast('Link removido.', 'info');
+        });
+      });
+    }
+
+    // ---- Pure-JS Autonomous Financial Text & Table Extractor ----
+    const MONTH_PATTERNS = [
+      ['janeiro','jan'], ['fevereiro','fev','feb'], ['marco','março','mar'],
+      ['abril','abr','apr'], ['maio','mai','may'], ['junho','jun'],
+      ['julho','jul'], ['agosto','ago','aug'], ['setembro','set','sep'],
+      ['outubro','out','oct'], ['novembro','nov'], ['dezembro','dez','dec']
+    ];
+
+    function detectMonthIndex(text) {
+      const s = stripAccents(text);
+      for (let i = 0; i < 12; i++) {
+        for (const p of MONTH_PATTERNS[i]) {
+          const re = new RegExp(`(^|[^a-z])${stripAccents(p)}([^a-z]|$)`, 'i');
+          if (re.test(s)) return i;
+        }
+      }
+      const numMatch = s.match(/\b(0?[1-9]|1[0-2])\s*[\/\-]\s*(20[2-3]\d)\b/);
+      if (numMatch) return Number(numMatch[1]) - 1;
+      const isoMatch = s.match(/\b(20[2-3]\d)\s*[\-\/]\s*(0?[1-9]|1[0-2])\b/);
+      if (isoMatch) return Number(isoMatch[2]) - 1;
+      return -1;
+    }
+
+    function detectYearInText(text, fallbackYear) {
+      const m = String(text || '').match(/\b(20[2-3]\d)\b/);
+      return m ? Number(m[1]) : fallbackYear;
+    }
+
+    function classifyCategory(headerText) {
+      const s = stripAccents(headerText);
+      if (!s) return null;
+      if ((s.includes('adm') && (s.includes('div') || s.includes('ativa') || s.includes('d.a'))) || s.includes('total autos') || s.includes('autos de infracao (adm')) {
+        return 'autos_total';
+      }
+      if (s.includes('farmac') || s.includes('tecnic') || (s.includes('anuidade') && (s.includes('pf') || s.includes('fisic') || s.includes('profission')))) {
+        return 'anuidades_pf';
+      }
+      if (s.includes('juridic') || (s.includes('anuidade') && (s.includes('pj') || s.includes('empres') || s.includes('estabelec')))) {
+        return 'anuidades_pj';
+      }
+      if (s.includes('divida ativa') || s.includes('div. ativa') || s.includes('execucao fiscal') || ((s.includes('auto') || s.includes('infrac')) && s.includes('ativa'))) {
+        return 'autos_da';
+      }
+      if (s.includes('administrativ') || ((s.includes('auto') || s.includes('infrac') || s.includes('multa')) && s.includes('adm'))) {
+        return 'autos_adm';
+      }
+      if (s.includes('meta')) return 'goal';
+      return null;
+    }
+
+    function extractMoneyNumbers(text) {
+      const matches = String(text || '').match(/(?:R\$\s*)?\d{1,3}(?:\.\d{3})*,\d{2}|\b\d+(?:\.\d{2})\b|\b\d{4,}\b/g);
+      if (!matches) return [];
+      return matches
+        .filter(tok => !/^20[2-3]\d$/.test(tok.trim())) // ignore bare year numbers like 2025
+        .map(parseNum)
+        .filter(v => v > 0);
+    }
+
+    function extractFromMatrix(rows, defaultYear) {
+      // rows = array of array of strings/numbers
+      const results = new Map(); // key: `${year}-${month}`
+      let currentYear = defaultYear;
+
+      function upsert(y, m, field, val) {
+        if (m < 0 || m > 11 || !Number.isFinite(val) || val <= 0) return;
+        const key = `${y}-${m}`;
+        if (!results.has(key)) {
+          results.set(key, { year: y, month: m, anuidades_pf: 0, anuidades_pj: 0, autos_adm: 0, autos_da: 0, autos_total: 0, goal: 0, confidence: 'Alta' });
+        }
+        const entry = results.get(key);
+        entry[field] = val;
+      }
+
+      // Detect year anywhere in top rows
+      for (let i = 0; i < Math.min(6, rows.length); i++) {
+        const joined = rows[i].join(' ');
+        const yFound = detectYearInText(joined, null);
+        if (yFound) { currentYear = yFound; break; }
+      }
+
+      // Orientation A: Header row contains categories, subsequent rows contain months
+      let headerRowIdx = -1;
+      let colMap = {};
+      for (let r = 0; r < Math.min(15, rows.length); r++) {
+        const tempMap = {};
+        let hits = 0;
+        rows[r].forEach((cell, cIdx) => {
+          const cat = classifyCategory(cell);
+          if (cat && tempMap[cat] === undefined) { tempMap[cat] = cIdx; hits++; }
+        });
+        if (hits >= 2) { headerRowIdx = r; colMap = tempMap; break; }
+      }
+
+      if (headerRowIdx >= 0) {
+        let yearColIdx = -1;
+        rows[headerRowIdx].forEach((cell, cIdx) => {
+          if (stripAccents(cell).includes('ano')) yearColIdx = cIdx;
+        });
+
+        for (let r = headerRowIdx + 1; r < rows.length; r++) {
+          const row = rows[r];
+          if (!row || !row.length) continue;
+          const rowJoined = row.join(' ');
+          if (stripAccents(rowJoined).includes('total')) continue;
+
+          let mIdx = -1;
+          for (let c = 0; c < Math.min(3, row.length); c++) {
+            const candidate = detectMonthIndex(row[c]);
+            if (candidate >= 0) { mIdx = candidate; break; }
+          }
+          if (mIdx < 0) continue;
+
+          let rowYear = currentYear;
+          if (yearColIdx >= 0 && row[yearColIdx]) {
+            rowYear = detectYearInText(row[yearColIdx], currentYear);
+          } else {
+            rowYear = detectYearInText(row[0] + ' ' + (row[1] || ''), currentYear);
+          }
+
+          Object.entries(colMap).forEach(([field, cIdx]) => {
+            const val = parseNum(row[cIdx]);
+            if (val > 0) upsert(rowYear, mIdx, field, val);
+          });
+        }
+      }
+
+      // Orientation B: Header row contains months (Jan, Fev, ...), rows contain categories
+      if (results.size === 0) {
+        let mHeaderRow = -1;
+        let monthCols = {};
+        for (let r = 0; r < Math.min(15, rows.length); r++) {
+          const map = {};
+          let hits = 0;
+          rows[r].forEach((cell, cIdx) => {
+            const mIdx = detectMonthIndex(cell);
+            if (mIdx >= 0 && map[mIdx] === undefined) { map[mIdx] = cIdx; hits++; }
+          });
+          if (hits >= 2) { mHeaderRow = r; monthCols = map; break; }
+        }
+        if (mHeaderRow >= 0) {
+          for (let r = mHeaderRow + 1; r < rows.length; r++) {
+            const row = rows[r];
+            const cat = classifyCategory(row[0] || row[1] || '');
+            if (!cat) continue;
+            Object.entries(monthCols).forEach(([mIdx, cIdx]) => {
+              const val = parseNum(row[cIdx]);
+              if (val > 0) upsert(currentYear, Number(mIdx), cat, val);
+            });
+          }
+        }
+      }
+
+      // Finalize autos_total calculation on extracted records
+      const list = Array.from(results.values()).map(item => {
+        if (item.autos_total === 0 && (item.autos_adm > 0 || item.autos_da > 0)) {
+          item.autos_total = Math.round((item.autos_adm + item.autos_da) * 100) / 100;
+        }
+        return item;
+      });
+      list.sort((a, b) => a.year - b.year || a.month - b.month);
+      return list;
+    }
+
+    function extractFromFreeText(text, defaultYear) {
+      // First try delimited table parsing (CSV/TSV/pipe)
+      const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const delim = lines.some(l => l.includes('\t')) ? '\t' : (lines.some(l => l.includes(';')) ? ';' : (lines.some(l => l.includes('|')) ? '|' : ','));
+      const matrix = lines.map(l => l.split(delim).map(c => c.trim()));
+      const fromTable = extractFromMatrix(matrix, defaultYear);
+      if (fromTable.length > 0) return fromTable;
+
+      // Free-form intelligent line-by-line & segment extraction (great for PDFs and copied summaries)
+      const results = new Map();
+      let activeYear = detectYearInText(text, defaultYear);
+      let activeMonth = -1;
+
+      function put(y, m, field, val) {
+        if (m < 0 || val <= 0) return;
+        const k = `${y}-${m}`;
+        if (!results.has(k)) {
+          results.set(k, { year: y, month: m, anuidades_pf: 0, anuidades_pj: 0, autos_adm: 0, autos_da: 0, autos_total: 0, goal: 0, confidence: 'Média' });
+        }
+        results.get(k)[field] = val;
+      }
+
+      for (const line of lines) {
+        const yLine = detectYearInText(line, null);
+        if (yLine) activeYear = yLine;
+        const mLine = detectMonthIndex(line);
+        if (mLine >= 0) activeMonth = mLine;
+
+        // Split by '|' or ';' if multiple key:value segments sit on one line
+        const segments = line.split(/[|;]/);
+        for (const seg of segments) {
+          const mSeg = detectMonthIndex(seg);
+          if (mSeg >= 0) activeMonth = mSeg;
+          const cat = classifyCategory(seg);
+          if (cat) {
+            const nums = extractMoneyNumbers(seg);
+            if (nums.length > 0) {
+              put(activeYear, activeMonth >= 0 ? activeMonth : CURRENT_MONTH, cat, nums[nums.length - 1]);
+            }
+          }
+        }
+      }
+
+      const list = Array.from(results.values()).map(item => {
+        if (item.autos_total === 0 && (item.autos_adm > 0 || item.autos_da > 0)) {
+          item.autos_total = Math.round((item.autos_adm + item.autos_da) * 100) / 100;
+        }
+        return item;
+      });
+      list.sort((a, b) => a.year - b.year || a.month - b.month);
+      return list;
+    }
+
+    // ---- Pure-JS .XLSX Binary Reader (ZIP + DecompressionStream + XML) ----
+    async function decompressRawDeflate(uint8) {
+      const ds = new DecompressionStream('deflate-raw');
+      const writer = ds.writable.getWriter();
+      writer.write(uint8);
+      writer.close();
+      const buf = await new Response(ds.readable).arrayBuffer();
+      return new Uint8Array(buf);
+    }
+
+    async function decompressZlib(uint8) {
+      const ds = new DecompressionStream('deflate');
+      const writer = ds.writable.getWriter();
+      writer.write(uint8);
+      writer.close();
+      const buf = await new Response(ds.readable).arrayBuffer();
+      return new Uint8Array(buf);
+    }
+
+    async function unzipEntries(arrayBuffer) {
+      const bytes = new Uint8Array(arrayBuffer);
+      const view = new DataView(arrayBuffer);
+      // Locate End of Central Directory (0x06054b50)
+      let eocdOffset = -1;
+      for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+        if (view.getUint32(i, true) === 0x06054b50) { eocdOffset = i; break; }
+      }
+      if (eocdOffset < 0) throw new Error('Arquivo .xlsx inválido (cabeçalho ZIP não encontrado).');
+
+      const totalEntries = view.getUint16(eocdOffset + 10, true);
+      const cdOffset = view.getUint32(eocdOffset + 16, true);
+      const decoder = new TextDecoder('utf-8');
+      const entries = {};
+
+      let ptr = cdOffset;
+      for (let i = 0; i < totalEntries; i++) {
+        if (view.getUint32(ptr, true) !== 0x02014b50) break;
+        const method = view.getUint16(ptr + 10, true);
+        const compSize = view.getUint32(ptr + 20, true);
+        const nameLen = view.getUint16(ptr + 28, true);
+        const extraLen = view.getUint16(ptr + 30, true);
+        const commentLen = view.getUint16(ptr + 32, true);
+        const localHeaderOffset = view.getUint32(ptr + 42, true);
+        const name = decoder.decode(bytes.subarray(ptr + 46, ptr + 46 + nameLen));
+        ptr += 46 + nameLen + extraLen + commentLen;
+
+        const lhNameLen = view.getUint16(localHeaderOffset + 26, true);
+        const lhExtraLen = view.getUint16(localHeaderOffset + 28, true);
+        const dataStart = localHeaderOffset + 30 + lhNameLen + lhExtraLen;
+        const compData = bytes.subarray(dataStart, dataStart + compSize);
+
+        if (method === 0) {
+          entries[name] = compData;
+        } else if (method === 8) {
+          entries[name] = await decompressRawDeflate(compData);
+        }
+      }
+      return entries;
+    }
+
+    function colLettersToIndex(letters) {
+      let idx = 0;
+      for (let i = 0; i < letters.length; i++) {
+        idx = idx * 26 + (letters.charCodeAt(i) - 64);
+      }
+      return idx - 1;
+    }
+
+    async function parseXlsxFile(arrayBuffer, defaultYear) {
+      const entries = await unzipEntries(arrayBuffer);
+      const decoder = new TextDecoder('utf-8');
+      const parser = new DOMParser();
+
+      // Shared Strings
+      const sharedStrings = [];
+      if (entries['xl/sharedStrings.xml']) {
+        const xml = parser.parseFromString(decoder.decode(entries['xl/sharedStrings.xml']), 'application/xml');
+        xml.querySelectorAll('si').forEach(si => {
+          const texts = Array.from(si.querySelectorAll('t')).map(t => t.textContent || '');
+          sharedStrings.push(texts.join(''));
+        });
+      }
+
+      // Sheet files
+      const sheetNames = Object.keys(entries).filter(k => /^xl\/worksheets\/sheet\d+\.xml$/i.test(k)).sort();
+      const allExtracted = [];
+
+      for (const sName of sheetNames) {
+        const xml = parser.parseFromString(decoder.decode(entries[sName]), 'application/xml');
+        const rows = [];
+        xml.querySelectorAll('sheetData > row').forEach(rowEl => {
+          const rowArr = [];
+          rowEl.querySelectorAll('c').forEach(cEl => {
+            const ref = cEl.getAttribute('r') || '';
+            const colMatch = ref.match(/^([A-Z]+)/i);
+            const cIdx = colMatch ? colLettersToIndex(colMatch[1].toUpperCase()) : rowArr.length;
+            const type = cEl.getAttribute('t');
+            let val = '';
+            if (type === 's') {
+              const vEl = cEl.querySelector('v');
+              val = vEl ? (sharedStrings[Number(vEl.textContent)] || '') : '';
+            } else if (type === 'inlineStr') {
+              val = Array.from(cEl.querySelectorAll('t')).map(t => t.textContent).join('');
+            } else {
+              const vEl = cEl.querySelector('v');
+              val = vEl ? vEl.textContent : '';
+            }
+            rowArr[cIdx] = val;
+          });
+          if (rowArr.some(v => v !== undefined && String(v).trim() !== '')) {
+            rows.push(rowArr.map(v => v ?? ''));
+          }
+        });
+        const extracted = extractFromMatrix(rows, defaultYear);
+        allExtracted.push(...extracted);
+      }
+      return allExtracted;
+    }
+
+    // ---- Pure-JS .PDF Text Extractor (FlateDecode + Text Operators) ----
+    function decodePdfLiteral(str) {
+      return str
+        .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)))
+        .replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t')
+        .replace(/\\\(/g, '(').replace(/\\\)/g, ')').replace(/\\\\/g, '\\');
+    }
+
+    function decodePdfHex(hex) {
+      const clean = hex.replace(/\s+/g, '');
+      let out = '';
+      if (clean.toUpperCase().startsWith('FEFF')) {
+        for (let i = 4; i < clean.length; i += 4) {
+          out += String.fromCharCode(parseInt(clean.substr(i, 4), 16));
+        }
+      } else {
+        for (let i = 0; i < clean.length; i += 2) {
+          const code = parseInt(clean.substr(i, 2), 16);
+          if (code >= 32) out += String.fromCharCode(code);
+        }
+      }
+      return out;
+    }
+
+    function extractTextFromPdfContentStream(contentStr) {
+      const lines = [];
+      let currentLine = '';
+      // Tokenize BT ... ET blocks or text operators
+      const opRegex = /(\((?:\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>|\[[\s\S]*?\])\s*(Tj|TJ|'|"|Td|TD|T\*)/g;
+      let match;
+      let lastIdx = 0;
+      while ((match = opRegex.exec(contentStr)) !== null) {
+        const between = contentStr.slice(lastIdx, match.index);
+        if (/\b(T\*|Td|TD|Tm)\b/.test(between) && currentLine.trim()) {
+          lines.push(currentLine.trim());
+          currentLine = '';
+        }
+        lastIdx = opRegex.lastIndex;
+        const payload = match[1];
+        const op = match[2];
+        if (op === 'Tj' || op === "'" || op === '"') {
+          const txt = payload.startsWith('(') ? decodePdfLiteral(payload.slice(1, -1)) : decodePdfHex(payload.slice(1, -1));
+          if (op === "'" || op === '"') {
+            if (currentLine.trim()) lines.push(currentLine.trim());
+            currentLine = txt;
+          } else {
+            currentLine += txt + ' ';
+          }
+        } else if (op === 'TJ') {
+          const inner = payload.slice(1, -1);
+          const parts = inner.match(/\((?:\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>|-?\d+(?:\.\d+)?/g) || [];
+          for (const p of parts) {
+            if (p.startsWith('(')) currentLine += decodePdfLiteral(p.slice(1, -1));
+            else if (p.startsWith('<')) currentLine += decodePdfHex(p.slice(1, -1));
+            else if (Number(p) < -180) currentLine += ' ';
+          }
+          currentLine += ' ';
+        }
+      }
+      if (currentLine.trim()) lines.push(currentLine.trim());
+      return lines.join('\n');
+    }
+
+    async function parsePdfFile(arrayBuffer, defaultYear) {
+      const bytes = new Uint8Array(arrayBuffer);
+      let latin = '';
+      for (let i = 0; i < bytes.length; i++) latin += String.fromCharCode(bytes[i]);
+
+      let fullText = '';
+      const streamRe = /stream\r?\n/g;
+      let m;
+      while ((m = streamRe.exec(latin)) !== null) {
+        const start = m.index + m[0].length;
+        const end = latin.indexOf('endstream', start);
+        if (end < 0) break;
+        const dictHeader = latin.slice(Math.max(0, m.index - 220), m.index);
+        const rawSlice = bytes.subarray(start, end);
+        let decodedStream = '';
+        if (/\/FlateDecode/.test(dictHeader)) {
+          try {
+            const inflated = await decompressZlib(rawSlice);
+            for (let i = 0; i < inflated.length; i++) decodedStream += String.fromCharCode(inflated[i]);
+          } catch {
+            try {
+              const inflated = await decompressRawDeflate(rawSlice);
+              for (let i = 0; i < inflated.length; i++) decodedStream += String.fromCharCode(inflated[i]);
+            } catch { /* skip binary/image stream */ }
+          }
+        } else if (!/\/DCTDecode|\/JPXDecode|\/Image/.test(dictHeader)) {
+          decodedStream = latin.slice(start, end);
+        }
+
+        if (decodedStream && (decodedStream.includes('Tj') || decodedStream.includes('TJ'))) {
+          fullText += '\n' + extractTextFromPdfContentStream(decodedStream);
+        }
+        streamRe.lastIndex = end + 9;
+      }
+
+      if (!fullText.trim()) {
+        // Fallback: scan readable text in raw PDF
+        fullText = extractTextFromPdfContentStream(latin);
+      }
+
+      document.getElementById('rawTextInput').value = fullText.trim().slice(0, 8000);
+      return extractFromFreeText(fullText, defaultYear);
+    }
+
+    // ---- Google Drive URL Converter & Importer ----
+    function parseDriveUrl(url) {
+      const s = String(url || '').trim();
+      const sheetMatch = s.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+      if (sheetMatch) {
+        const id = sheetMatch[1];
+        const gidMatch = s.match(/gid=(\d+)/);
+        const gid = gidMatch ? `&gid=${gidMatch[1]}` : '';
+        return { type: 'sheets', id, exportUrl: `https://docs.google.com/spreadsheets/d/${id}/export?format=csv${gid}`, downloadUrl: `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx` };
+      }
+      const docMatch = s.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/);
+      if (docMatch) {
+        const id = docMatch[1];
+        return { type: 'docs', id, exportUrl: `https://docs.google.com/document/d/${id}/export?format=txt`, downloadUrl: `https://docs.google.com/document/d/${id}/export?format=txt` };
+      }
+      const fileMatch = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/);
+      if (fileMatch) {
+        const id = fileMatch[1];
+        return { type: 'file', id, exportUrl: `https://drive.google.com/uc?export=download&id=${id}`, downloadUrl: `https://drive.google.com/uc?export=download&id=${id}` };
+      }
+      return null;
+    }
+
+    async function handleDriveImport() {
+      const url = document.getElementById('driveUrlInput').value.trim();
+      const label = document.getElementById('driveLabelInput').value.trim();
+      const defaultYear = Number(document.getElementById('importDefaultYear').value) || selectedYear;
+      if (!url) { showToast('Informe um link do Google Drive ou Google Sheets.', 'error'); return; }
+
+      const parsed = parseDriveUrl(url);
+      if (!parsed) { showToast('Link não reconhecido como Google Drive/Sheets/Docs válido.', 'error'); return; }
+
+      // Save link if not yet saved
+      if (!state.driveLinks.some(l => l.url === url)) {
+        state.driveLinks.unshift({ url, label: label || `Google ${parsed.type.toUpperCase()} (${parsed.id.slice(0, 8)}...)`, addedAt: new Date().toISOString() });
+        saveState();
+        renderDriveLinks();
+      }
+
+      showToast('Tentando leitura autônoma do link do Google Drive...', 'info');
+      try {
+        const resp = await fetch(parsed.exportUrl, { mode: 'cors' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const contentType = resp.headers.get('content-type') || '';
+        let extracted = [];
+        if (contentType.includes('pdf')) {
+          const buf = await resp.arrayBuffer();
+          extracted = await parsePdfFile(buf, defaultYear);
+        } else if (contentType.includes('spreadsheetml') || contentType.includes('zip')) {
+          const buf = await resp.arrayBuffer();
+          extracted = await parseXlsxFile(buf, defaultYear);
+        } else {
+          const txt = await resp.text();
+          if (txt.includes('<!DOCTYPE html>') && txt.toLowerCase().includes('accounts.google.com')) {
+            throw new Error('Arquivo privado no Google Drive (exige login).');
+          }
+          document.getElementById('rawTextInput').value = txt.slice(0, 8000);
+          extracted = extractFromFreeText(txt, defaultYear);
+        }
+        presentExtractionPreview(extracted, `Google Drive (${parsed.type})`);
+      } catch (err) {
+        showToast('O navegador bloqueou a leitura direta (arquivo privado ou CORS). Link salvo! Use "Baixar/Copiar" ou torne o link público para leitura direta.', 'error');
+        const panel = document.getElementById('extractionPreviewPanel');
+        panel.style.display = 'block';
+        document.getElementById('extractionSummaryText').innerHTML = `
+          Não foi possível ler o link diretamente do navegador (${escapeHtml(err.message)}).
+          Para arquivos privados no Drive: <a href="${escapeHtml(parsed.downloadUrl)}" target="_blank" rel="noopener noreferrer" style="color:#ff9d5c;font-weight:700;">clique aqui para baixar o arquivo do seu Drive</a> e arraste-o na caixa .XLSX ou .PDF acima — ou copie a tabela e cole no campo de texto inteligente!
+        `;
+        document.getElementById('extractionPreviewTable').innerHTML = '';
+      }
+    }
+
+    function presentExtractionPreview(rows, sourceLabel) {
+      pendingImportRows = rows;
+      const panel = document.getElementById('extractionPreviewPanel');
+      panel.style.display = 'block';
+
+      if (!rows.length) {
+        document.getElementById('extractionSummaryText').textContent = `Nenhum registro financeiro reconhecido em "${sourceLabel}". Verifique se o arquivo contém nomes de meses e os campos de Anuidades/Autos de Infração, ou ajuste no campo de texto acima.`;
+        document.getElementById('extractionPreviewTable').innerHTML = '';
+        showToast('Nenhum campo compatível encontrado automaticamente.', 'error');
+        return;
+      }
+
+      document.getElementById('extractionSummaryText').textContent = `${rows.length} mês(es) extraído(s) de "${sourceLabel}". Você pode conferir/editar os valores antes de confirmar.`;
+      renderExtractionPreviewTable();
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showToast(`${rows.length} registro(s) extraído(s) com sucesso! Revise e confirme.`, 'success');
+    }
+
+    function renderExtractionPreviewTable() {
+      const tbl = document.getElementById('extractionPreviewTable');
+      const rowsHtml = pendingImportRows.map((r, i) => `
+        <tr>
+          <td><strong>${MONTHS_SHORT[r.month]}/${r.year}</strong></td>
+          <td><span class="status-badge ${r.confidence === 'Alta' ? 'status-hit' : 'status-warn'}">${r.confidence}</span></td>
+          <td class="num"><input class="input input-sm mono" data-imp="${i}:anuidades_pf" value="${fmtInputVal(r.anuidades_pf)}" style="width:120px;text-align:right;" /></td>
+          <td class="num"><input class="input input-sm mono" data-imp="${i}:anuidades_pj" value="${fmtInputVal(r.anuidades_pj)}" style="width:120px;text-align:right;" /></td>
+          <td class="num"><input class="input input-sm mono" data-imp="${i}:autos_adm" value="${fmtInputVal(r.autos_adm)}" style="width:110px;text-align:right;" /></td>
+          <td class="num"><input class="input input-sm mono" data-imp="${i}:autos_da" value="${fmtInputVal(r.autos_da)}" style="width:110px;text-align:right;" /></td>
+          <td class="num mono" style="color:#ff9d70;font-weight:700;">${fmtBRL(r.autos_total || (r.autos_adm + r.autos_da))}</td>
+          <td class="num"><button class="btn btn-danger btn-icon" data-imp-del="${i}">×</button></td>
+        </tr>
+      `).join('');
+
+      tbl.innerHTML = `
+        <thead>
+          <tr>
+            <th>Período</th><th>Confiança</th>
+            <th class="num">Anuid. Farm./Téc.</th><th class="num">Anuid. PJ</th>
+            <th class="num">Autos Adm.</th><th class="num">Autos Dív. Ativa</th>
+            <th class="num">Autos (ADM+DA)</th><th class="num">Remover</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      `;
+
+      tbl.querySelectorAll('[data-imp]').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const [idx, field] = inp.dataset.imp.split(':');
+          const row = pendingImportRows[Number(idx)];
+          row[field] = parseNum(inp.value);
+          row.autos_total = Math.round((row.autos_adm + row.autos_da) * 100) / 100;
+          renderExtractionPreviewTable();
+        });
+      });
+      tbl.querySelectorAll('[data-imp-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pendingImportRows.splice(Number(btn.dataset.impDel), 1);
+          renderExtractionPreviewTable();
+        });
+      });
+    }
+
+    function confirmPendingImport() {
+      if (!pendingImportRows.length) return;
+      const mode = document.getElementById('importMergeMode').value;
+      let count = 0;
+
+      pendingImportRows.forEach(item => {
+        const y = item.year;
+        if (!state.years[y]) {
+          state.years[y] = Array.from({ length: 12 }, () => emptyMonthRecord());
+          state.goals[y] = Array.from({ length: 12 }, () => 0);
+        }
+        const existing = mode === 'replace' ? emptyMonthRecord() : normalizeRecord(state.years[y][item.month]);
+        if (item.anuidades_pf > 0 || mode === 'replace') existing.anuidades_pf = item.anuidades_pf;
+        if (item.anuidades_pj > 0 || mode === 'replace') existing.anuidades_pj = item.anuidades_pj;
+        if (item.autos_adm > 0 || mode === 'replace') existing.autos_adm = item.autos_adm;
+        if (item.autos_da > 0 || mode === 'replace') existing.autos_da = item.autos_da;
+        if (item.autos_adm === 0 && item.autos_da === 0 && item.autos_total > 0) {
+          existing.autos_manual = true;
+          existing.autos_total = item.autos_total;
+        } else {
+          existing.autos_manual = false;
+        }
+        state.years[y][item.month] = normalizeRecord(existing);
+        if (item.goal > 0) state.goals[y][item.month] = item.goal;
+        selectedYear = y;
+        count++;
+      });
+
+      state.isDemo = false;
+      saveState();
+      pendingImportRows = [];
+      document.getElementById('extractionPreviewPanel').style.display = 'none';
+      renderAll();
+      showToast(`${count} mês(es) importado(s) e integrado(s) ao dashboard!`, 'success');
+    }
+
+    /* =====================================================================
+       11. PURE-JS .XLSX WRITER (REAL MULTI-SHEET EXCEL WORKBOOK)
+       ===================================================================== */
+    const CRC_TABLE = (() => {
+      const t = new Uint32Array(256);
+      for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        t[i] = c >>> 0;
+      }
+      return t;
+    })();
+
+    function crc32(bytes) {
+      let c = 0xFFFFFFFF;
+      for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+      return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    function createZipBlob(files) {
+      const enc = new TextEncoder();
+      const localParts = [];
+      const centralParts = [];
+      let offset = 0;
+
+      for (const f of files) {
+        const nameBytes = enc.encode(f.name);
+        const dataBytes = typeof f.content === 'string' ? enc.encode(f.content) : f.content;
+        const crc = crc32(dataBytes);
+
+        const lh = new Uint8Array(30 + nameBytes.length);
+        const lhv = new DataView(lh.buffer);
+        lhv.setUint32(0, 0x04034b50, true);
+        lhv.setUint16(4, 20, true);
+        lhv.setUint16(8, 0, true); // store
+        lhv.setUint32(14, crc, true);
+        lhv.setUint32(18, dataBytes.length, true);
+        lhv.setUint32(22, dataBytes.length, true);
+        lhv.setUint16(26, nameBytes.length, true);
+        lh.set(nameBytes, 30);
+
+        localParts.push(lh, dataBytes);
+
+        const ch = new Uint8Array(46 + nameBytes.length);
+        const chv = new DataView(ch.buffer);
+        chv.setUint32(0, 0x02014b50, true);
+        chv.setUint16(4, 20, true);
+        chv.setUint16(6, 20, true);
+        chv.setUint16(10, 0, true);
+        chv.setUint32(16, crc, true);
+        chv.setUint32(20, dataBytes.length, true);
+        chv.setUint32(24, dataBytes.length, true);
+        chv.setUint16(28, nameBytes.length, true);
+        chv.setUint32(42, offset, true);
+        ch.set(nameBytes, 46);
+        centralParts.push(ch);
+
+        offset += lh.length + dataBytes.length;
+      }
+
+      const cdSize = centralParts.reduce((a, b) => a + b.length, 0);
+      const eocd = new Uint8Array(22);
+      const ev = new DataView(eocd.buffer);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(8, files.length, true);
+      ev.setUint16(10, files.length, true);
+      ev.setUint32(12, cdSize, true);
+      ev.setUint32(16, offset, true);
+
+      return new Blob([...localParts, ...centralParts, eocd], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+    }
+
+    function xmlEsc(s) {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function colRef(c) {
+      let s = '';
+      c++;
+      while (c > 0) {
+        const r = (c - 1) % 26;
+        s = String.fromCharCode(65 + r) + s;
+        c = Math.floor((c - 1) / 26);
+      }
+      return s;
+    }
+
+    function buildSheetXml(rows, colWidths = []) {
+      const colsXml = colWidths.length
+        ? `<cols>${colWidths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>`
+        : '';
+      const rowsXml = rows.map((row, rIdx) => {
+        const cells = row.map((cell, cIdx) => {
+          const ref = colRef(cIdx) + (rIdx + 1);
+          if (cell && typeof cell === 'object') {
+            const st = cell.s !== undefined ? ` s="${cell.s}"` : '';
+            if (typeof cell.v === 'number') return `<c r="${ref}"${st}><v>${cell.v}</v></c>`;
+            return `<c r="${ref}" t="inlineStr"${st}><is><t>${xmlEsc(cell.v)}</t></is></c>`;
+          }
+          if (typeof cell === 'number') return `<c r="${ref}" s="2"><v>${cell}</v></c>`;
+          return `<c r="${ref}" t="inlineStr"${rIdx === 0 ? ' s="1"' : ''}><is><t>${xmlEsc(cell)}</t></is></c>`;
+        }).join('');
+        return `<row r="${rIdx + 1}">${cells}</row>`;
+      }).join('');
+
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+        `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${colsXml}<sheetData>${rowsXml}</sheetData></worksheet>`;
+    }
+
+    function buildWorkbookXlsx(sheets) {
+      const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <numFmts count="2">
+    <numFmt numFmtId="164" formatCode="&quot;R$ &quot;#,##0.00"/>
+    <numFmt numFmtId="165" formatCode="0.0%"/>
+  </numFmts>
+  <fonts count="3">
+    <font><sz val="11"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><color rgb="FF1F1F1F"/><name val="Calibri"/></font>
+  </fonts>
+  <fills count="4">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFC9182B"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFFE8D6"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border><left style="thin"><color rgb="FFD9D9D9"/></left><right style="thin"><color rgb="FFD9D9D9"/></right><top style="thin"><color rgb="FFD9D9D9"/></top><bottom style="thin"><color rgb="FFD9D9D9"/></bottom><diagonal/></border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="6">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0"/>
+    <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"/>
+    <xf numFmtId="164" fontId="2" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1"/>
+    <xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"/>
+    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1"/>
+  </cellXfs>
+</styleSheet>`;
+
+      const files = [
+        {
+          name: '[Content_Types].xml',
+          content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+  ${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+</Types>`
+        },
+        {
+          name: '_rels/.rels',
+          content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`
+        },
+        {
+          name: 'xl/workbook.xml',
+          content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    ${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}
+  </sheets>
+</workbook>`
+        },
+        {
+          name: 'xl/_rels/workbook.xml.rels',
+          content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  ${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}
+  <Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`
+        },
+        { name: 'xl/styles.xml', content: stylesXml }
+      ];
+
+      sheets.forEach((s, i) => {
+        files.push({ name: `xl/worksheets/sheet${i + 1}.xml`, content: buildSheetXml(s.rows, s.widths) });
+      });
+
+      return createZipBlob(files);
+    }
+
+    function exportXlsxReport() {
+      const years = getSortedYears();
+      const curTot = getYearTotals(selectedYear);
+      const analysis = analyzeGoals(selectedYear);
+
+      // Sheet 1: Mensal Ano Selecionado
+      const monthlyRows = [[
+        'Mês', 'Ano',
+        'Anuidades Farmacêuticos e Técnicos',
+        'Anuidades Pessoa Jurídica',
+        'Autos de Infração Administrativo',
+        'Autos de Infração Dívida Ativa',
+        'Autos de Infração (ADM.+DÍV. ATIVA)',
+        'Total Geral', 'Meta Mensal', 'Desvio vs Meta'
+      ]];
+      for (let m = 0; m < 12; m++) {
+        const r = normalizeRecord(state.years[selectedYear][m]);
+        const t = getMonthTotal(r);
+        const g = parseNum(state.goals[selectedYear][m]);
+        monthlyRows.push([
+          MONTHS[m], { v: selectedYear, s: 0 },
+          r.anuidades_pf, r.anuidades_pj, r.autos_adm, r.autos_da, r.autos_total, t, g, t - g
+        ]);
+      }
+      monthlyRows.push([
+        { v: `TOTAL ${selectedYear}`, s: 5 }, { v: '', s: 5 },
+        { v: curTot.anuidades_pf, s: 3 }, { v: curTot.anuidades_pj, s: 3 },
+        { v: curTot.autos_adm, s: 3 }, { v: curTot.autos_da, s: 3 },
+        { v: curTot.autos_total, s: 3 }, { v: curTot.total, s: 3 },
+        { v: curTot.goalTotal, s: 3 }, { v: curTot.total - curTot.goalTotal, s: 3 }
+      ]);
+
+      // Sheet 2: Comparativo Anual
+      const annualRows = [['Campo Comparativo', ...years.map(String)]];
+      [...CATEGORIES, { key: 'total', label: 'TOTAL GERAL ARRECADADO' }].forEach(c => {
+        annualRows.push([
+          c.label,
+          ...years.map(y => {
+            const yt = getYearTotals(y);
+            return c.key === 'total' ? { v: yt.total, s: 3 } : yt[c.key];
+          })
+        ]);
+      });
+
+      // Sheet 3: Metas e Soluções
+      const goalsRows = [['Mês', 'Realizado (R$)', 'Meta (R$)', 'Atingimento', 'Déficit/Superávit (R$)', 'Recomendação Estratégica']];
+      for (let m = 0; m < 12; m++) {
+        const r = getMonthTotal(state.years[selectedYear][m]);
+        const g = parseNum(state.goals[selectedYear][m]);
+        const ratio = g > 0 && r > 0 ? r / g : 0;
+        const missed = analysis.missedMonths.find(x => x.month === m);
+        const recText = missed
+          ? `Ação corretiva prioritária: foco em ${missed.catDeficits[0]?.label || 'cobrança ativa'} e redistribuição de +${fmtBRL(analysis.extraPerRemainingMonth)} nos próximos meses.`
+          : (r > 0 ? 'Meta atingida. Manter cadência.' : 'Mês futuro — monitorar meta.');
+        goalsRows.push([MONTHS[m], r, g, { v: ratio, s: 4 }, r > 0 ? r - g : 0, recText]);
+      }
+
+      // Sheet 4: Base Completa (Todos os Anos)
+      const fullRows = [['Ano', 'Mês', 'Anuidades Farmacêuticos e Técnicos', 'Anuidades Pessoa Jurídica', 'Autos de Infração Administrativo', 'Autos de Infração Dívida Ativa', 'Autos de Infração (ADM.+DÍV. ATIVA)', 'Total Geral', 'Meta']];
+      years.forEach(y => {
+        for (let m = 0; m < 12; m++) {
+          const r = normalizeRecord(state.years[y][m]);
+          fullRows.push([{ v: y, s: 0 }, MONTHS[m], r.anuidades_pf, r.anuidades_pj, r.autos_adm, r.autos_da, r.autos_total, getMonthTotal(r), parseNum(state.goals[y]?.[m])]);
+        }
+      });
+
+      const blob = buildWorkbookXlsx([
+        { name: `Mensal_${selectedYear}`, rows: monthlyRows, widths: [14, 8, 28, 24, 24, 24, 26, 18, 18, 18] },
+        { name: 'Comparativo_Anual', rows: annualRows, widths: [34, ...years.map(() => 18)] },
+        { name: 'Metas_e_Solucoes', rows: goalsRows, widths: [14, 18, 18, 14, 20, 62] },
+        { name: 'Base_Completa', rows: fullRows, widths: [8, 14, 28, 24, 24, 24, 26, 18, 18] }
+      ]);
+
+      downloadBlob(blob, `Relatorio_Financeiro_${selectedYear}.xlsx`);
+      showToast(`Relatório Excel (.xlsx) de ${selectedYear} gerado com 4 abas!`, 'success');
+    }
+
+    function downloadTemplateXlsx() {
+      const rows = [
+        ['Mês', 'Ano', 'Anuidades Farmacêuticos e Técnicos', 'Anuidades Pessoa Jurídica', 'Autos de Infração Administrativo', 'Autos de Infração Dívida Ativa', 'Autos de Infração (ADM.+DÍV. ATIVA)', 'Meta'],
+        ['Janeiro', { v: selectedYear, s: 0 }, 420000, 360000, 62000, 48000, 110000, 900000],
+        ['Fevereiro', { v: selectedYear, s: 0 }, 390000, 340000, 58000, 44000, 102000, 850000]
+      ];
+      const blob = buildWorkbookXlsx([{ name: 'Modelo_Importacao', rows, widths: [14, 8, 30, 26, 26, 26, 28, 18] }]);
+      downloadBlob(blob, `Modelo_Importacao_Financeira_${selectedYear}.xlsx`);
+      showToast('Planilha modelo .xlsx baixada!', 'success');
+    }
+
+    /* =====================================================================
+       12. PURE-JS EXECUTIVE .PDF GENERATOR (VECTOR MULTI-PAGE PDF 1.4)
+       ===================================================================== */
+    function toWinAnsiEscaped(str) {
+      let out = '';
+      for (const ch of String(str ?? '')) {
+        const code = ch.charCodeAt(0);
+        if (ch === '\\' || ch === '(' || ch === ')') {
+          out += '\\' + ch;
+        } else if (code >= 32 && code <= 126) {
+          out += ch;
+        } else if (code >= 160 && code <= 255) {
+          out += '\\' + code.toString(8).padStart(3, '0');
+        } else if (code === 0x2013 || code === 0x2014) {
+          out += '-';
+        } else if (code === 0x2022) {
+          out += '*';
+        } else {
+          out += ' ';
+        }
+      }
+      return out;
+    }
+
+    function exportPdfReport() {
+      const years = getSortedYears();
+      const curTot = getYearTotals(selectedYear);
+      const cmpTot = getYearTotals(compareYear);
+      const analysis = analyzeGoals(selectedYear);
+      const pages = [];
+
+      // Helper to build PDF stream commands (A4: 595 x 842 pt)
+      function newPage() {
+        const cmds = [];
+        // Dark header strip
+        cmds.push('0.07 0.03 0.04 rg 0 762 595 80 re f');
+        // Vivid red-orange accent strip
+        cmds.push('1 0.14 0.22 rg 0 758 310 4 re f');
+        cmds.push('1 0.42 0.00 rg 310 758 285 4 re f');
+        // Header title
+        cmds.push(`BT /F2 17 Tf 1 1 1 rg 36 804 Td (${toWinAnsiEscaped('ACOMPANHAMENTO FINANCEIRO — RELATORIO ' + selectedYear)}) Tj ET`);
+        cmds.push(`BT /F1 9.5 Tf 0.92 0.78 0.72 rg 36 783 Td (${toWinAnsiEscaped('Anuidades e Autos de Infracao | Gerado em ' + new Date().toLocaleDateString('pt-BR') + ' | Comparativo base: ' + compareYear)}) Tj ET`);
+        return cmds;
+      }
+
+      function drawText(cmds, x, y, text, size = 9, bold = false, rgb = '0.12 0.10 0.10') {
+        cmds.push(`BT /${bold ? 'F2' : 'F1'} ${size} Tf ${rgb} rg ${x.toFixed(1)} ${y.toFixed(1)} Td (${toWinAnsiEscaped(text)}) Tj ET`);
+      }
+
+      function drawRightText(cmds, rightX, y, text, size = 8.5, bold = false, rgb = '0.12 0.10 0.10') {
+        const approxW = String(text).length * size * 0.51;
+        drawText(cmds, rightX - approxW, y, text, size, bold, rgb);
+      }
+
+      // ---- PAGE 1: Executive Summary + Monthly Table ----
+      const p1 = newPage();
+
+      // KPI Cards (4 boxes)
+      const kpis = [
+        { lbl: `TOTAL ARRECADADO (${selectedYear})`, val: fmtBRL(curTot.total), sub: `${curTot.filledMonths}/12 meses lançados` },
+        { lbl: `META ANUAL (${selectedYear})`, val: fmtBRL(curTot.goalTotal), sub: `Atingimento YTD: ${analysis.realizedGoalSum > 0 ? pctFmt.format((curTot.total / analysis.realizedGoalSum) * 100) + '%' : 'N/D'}` },
+        { lbl: 'ANUIDADES (PF + PJ)', val: fmtBRL(curTot.anuidades_pf + curTot.anuidades_pj), sub: `${curTot.total > 0 ? pctFmt.format(((curTot.anuidades_pf + curTot.anuidades_pj) / curTot.total) * 100) : '0'}% do total` },
+        { lbl: 'AUTOS (ADM. + DIV. ATIVA)', val: fmtBRL(curTot.autos_total), sub: `Adm: ${fmtCompact(curTot.autos_adm)} | DA: ${fmtCompact(curTot.autos_da)}` }
+      ];
+      kpis.forEach((k, idx) => {
+        const bx = 36 + idx * 133;
+        p1.push(`0.98 0.96 0.95 rg ${bx} 678 125 64 re f`);
+        p1.push(`0.95 0.30 0.12 rg ${bx} 739 125 3 re f`);
+        p1.push(`0.88 0.80 0.78 RG 0.6 w ${bx} 678 125 64 re S`);
+        drawText(p1, bx + 7, 726, k.lbl, 6.8, true, '0.48 0.20 0.18');
+        drawText(p1, bx + 7, 706, k.val, 10.5, true, '0.08 0.06 0.06');
+        drawText(p1, bx + 7, 688, k.sub, 7.2, false, '0.40 0.34 0.34');
+      });
+
+      // Monthly Table Header
+      drawText(p1, 36, 654, `1. Acompanhamento Mensal Detalhado (${selectedYear})`, 11.5, true, '0.78 0.10 0.16');
+      let ty = 632;
+      p1.push(`0.14 0.06 0.07 rg 36 ${ty - 5} 523 19 re f`);
+      const cols = [
+        { x: 40, lbl: 'Mes', r: false },
+        { x: 146, lbl: 'Anuid. Farm/Tec', r: true },
+        { x: 224, lbl: 'Anuid. PJ', r: true },
+        { x: 294, lbl: 'Autos Adm.', r: true },
+        { x: 364, lbl: 'Autos D.A.', r: true },
+        { x: 438, lbl: 'Autos Total', r: true },
+        { x: 512, lbl: 'Total Geral', r: true },
+        { x: 554, lbl: 'Meta%', r: true }
+      ];
+      cols.forEach(c => c.r ? drawRightText(p1, c.x, ty + 1, c.lbl, 7.3, true, '1 1 1') : drawText(p1, c.x, ty + 1, c.lbl, 7.3, true, '1 1 1'));
+
+      ty -= 20;
+      for (let m = 0; m < 12; m++) {
+        const r = normalizeRecord(state.years[selectedYear][m]);
+        const t = getMonthTotal(r);
+        const g = parseNum(state.goals[selectedYear][m]);
+        const pct = g > 0 && t > 0 ? pctFmt.format((t / g) * 100) + '%' : '-';
+        if (m % 2 === 1) p1.push(`0.98 0.96 0.95 rg 36 ${ty - 4} 523 16 re f`);
+        drawText(p1, 40, ty, MONTHS[m], 7.8, true);
+        drawRightText(p1, 146, ty, fmtBRL(r.anuidades_pf), 7.5);
+        drawRightText(p1, 224, ty, fmtBRL(r.anuidades_pj), 7.5);
+        drawRightText(p1, 294, ty, fmtBRL(r.autos_adm), 7.5);
+        drawRightText(p1, 364, ty, fmtBRL(r.autos_da), 7.5);
+        drawRightText(p1, 438, ty, fmtBRL(r.autos_total), 7.5, true, '0.78 0.25 0.05');
+        drawRightText(p1, 512, ty, fmtBRL(t), 7.6, true);
+        drawRightText(p1, 554, ty, pct, 7.5, true, t >= g && g > 0 ? '0.08 0.55 0.25' : '0.80 0.12 0.20');
+        ty -= 16;
+      }
+      // Total Row
+      p1.push(`0.98 0.90 0.85 rg 36 ${ty - 5} 523 18 re f`);
+      drawText(p1, 40, ty, `TOTAL ${selectedYear}`, 8, true, '0.75 0.08 0.14');
+      drawRightText(p1, 146, ty, fmtBRL(curTot.anuidades_pf), 7.6, true);
+      drawRightText(p1, 224, ty, fmtBRL(curTot.anuidades_pj), 7.6, true);
+      drawRightText(p1, 294, ty, fmtBRL(curTot.autos_adm), 7.6, true);
+      drawRightText(p1, 364, ty, fmtBRL(curTot.autos_da), 7.6, true);
+      drawRightText(p1, 438, ty, fmtBRL(curTot.autos_total), 7.6, true);
+      drawRightText(p1, 512, ty, fmtBRL(curTot.total), 7.8, true, '0.75 0.08 0.14');
+
+      // Vector Monthly Bar Chart on Page 1 Bottom
+      drawText(p1, 36, 392, `2. Grafico de Evolucao Mensal (${selectedYear} vs ${compareYear})`, 11, true, '0.78 0.10 0.16');
+      const cX = 48, cY = 235, cW = 505, cH = 135;
+      p1.push(`0.99 0.98 0.98 rg ${cX} ${cY} ${cW} ${cH} re f`);
+      p1.push(`0.86 0.80 0.78 RG 0.6 w ${cX} ${cY} ${cW} ${cH} re S`);
+      const mCur = Array.from({ length: 12 }, (_, m) => getMonthTotal(state.years[selectedYear][m]));
+      const mCmp = Array.from({ length: 12 }, (_, m) => getMonthTotal(state.years[compareYear]?.[m]));
+      const mMax = Math.max(1000, ...mCur, ...mCmp) * 1.12;
+      const mStep = cW / 12;
+      for (let m = 0; m < 12; m++) {
+        const bx = cX + m * mStep + 8;
+        const h1 = (mCmp[m] / mMax) * (cH - 18);
+        const h2 = (mCur[m] / mMax) * (cH - 18);
+        p1.push(`0.88 0.78 0.72 rg ${bx.toFixed(1)} ${cY} 11 ${h1.toFixed(1)} re f`);
+        p1.push(`0.96 0.28 0.10 rg ${(bx + 13).toFixed(1)} ${cY} 11 ${h2.toFixed(1)} re f`);
+        drawText(p1, bx + 4, cY - 12, MONTHS_SHORT[m], 7.5, false, '0.32 0.28 0.28');
+      }
+      drawText(p1, 48, 206, `Legenda: Barras cinza-pessego = ${compareYear} | Barras vermelho-laranja = ${selectedYear}`, 8, false, '0.40 0.34 0.34');
+      drawText(p1, 36, 28, 'Acompanhamento Financeiro · Relatorio de Apresentacao Gerencial — Pagina 1 de 2', 7.5, false, '0.5 0.45 0.45');
+      pages.push(p1.join('\n'));
+
+      // ---- PAGE 2: Annual Comparison + Unmet Goals Action Plan ----
+      const p2 = newPage();
+      drawText(p2, 36, 730, '3. Comparativo Anual Consolidado (Todos os Anos)', 11.5, true, '0.78 0.10 0.16');
+      let y2 = 708;
+      p2.push(`0.14 0.06 0.07 rg 36 ${y2 - 5} 523 19 re f`);
+      drawText(p2, 42, y2 + 1, 'Campo Comparativo', 8, true, '1 1 1');
+      const dispYears = years.slice(-5); // fit cleanly up to 5 years in A4 width
+      const colSpan = 310 / Math.max(1, dispYears.length);
+      dispYears.forEach((yr, idx) => {
+        drawRightText(p2, 245 + (idx + 1) * colSpan, y2 + 1, String(yr), 8, true, '1 1 1');
+      });
+
+      y2 -= 20;
+      [...CATEGORIES, { key: 'total', label: 'TOTAL GERAL ARRECADADO', isTot: true }].forEach((cat, rIdx) => {
+        if (cat.isTot) p2.push(`0.98 0.90 0.85 rg 36 ${y2 - 4} 523 18 re f`);
+        else if (rIdx % 2 === 1) p2.push(`0.98 0.96 0.95 rg 36 ${y2 - 4} 523 16 re f`);
+        drawText(p2, 42, y2, cat.label, 8, !!cat.isTot, cat.isTot ? '0.75 0.08 0.14' : '0.12 0.10 0.10');
+        dispYears.forEach((yr, idx) => {
+          const yt = getYearTotals(yr);
+          const v = cat.isTot ? yt.total : yt[cat.key];
+          drawRightText(p2, 245 + (idx + 1) * colSpan, y2, v > 0 ? fmtBRL(v) : '-', 7.8, !!cat.isTot);
+        });
+        y2 -= 18;
+      });
+
+      // Unmet Goals & Action Plan Section
+      y2 -= 22;
+      drawText(p2, 36, y2, `4. Diagnostico de Metas Nao Alcancadas e Plano de Solucoes (${selectedYear})`, 11.5, true, '0.78 0.10 0.16');
+      y2 -= 20;
+
+      if (analysis.missedMonths.length === 0) {
+        drawText(p2, 40, y2, `Todas as metas apuradas de ${selectedYear} foram atingidas ou superadas.`, 9.5, true, '0.08 0.55 0.25');
+      } else {
+        drawText(p2, 40, y2, `Deficit acumulado YTD: ${fmtBRL(analysis.cumulativeDeficit)} | Incremento necessario nos meses restantes: +${fmtBRL(analysis.extraPerRemainingMonth)}/mes`, 8.8, true, '0.80 0.12 0.20');
+        y2 -= 20;
+
+        analysis.missedMonths.slice(0, 6).forEach(item => {
+          if (y2 < 110) return;
+          p2.push(`0.99 0.95 0.94 rg 36 ${y2 - 46} 523 58 re f`);
+          p2.push(`0.92 0.22 0.14 rg 36 ${y2 - 46} 3.5 58 re f`);
+          drawText(p2, 46, y2, `${MONTHS[item.month]}/${selectedYear} — Deficit: ${fmtBRL(item.deficit)} (Realizado ${fmtBRL(item.realized)} vs Meta ${fmtBRL(item.goal)} | ${pctFmt.format(item.pct)}%)`, 8.5, true, '0.68 0.08 0.14');
+          const topC = item.catDeficits[0];
+          const action1 = topC && ACTION_PLAYBOOKS[topC.key] ? ACTION_PLAYBOOKS[topC.key][0] : 'Intensificar regua de cobranca e negociacao digital com boleto PIX.';
+          const action2 = topC && ACTION_PLAYBOOKS[topC.key] ? ACTION_PLAYBOOKS[topC.key][1] : 'Redistribuir meta nos meses restantes com foco em Divida Ativa.';
+          drawText(p2, 46, y2 - 16, `- Solucao 1: ${action1.slice(0, 96)}`, 7.7, false, '0.20 0.16 0.16');
+          drawText(p2, 46, y2 - 30, `- Solucao 2: ${action2.slice(0, 96)}`, 7.7, false, '0.20 0.16 0.16');
+          y2 -= 66;
+        });
+      }
+
+      drawText(p2, 36, 28, 'Acompanhamento Financeiro · Relatorio de Apresentacao Gerencial — Pagina 2 de 2', 7.5, false, '0.5 0.45 0.45');
+      pages.push(p2.join('\n'));
+
+      // Assemble PDF 1.4 with accurate byte offsets
+      const objects = [];
+      const addObj = body => { objects.push(body); return objects.length; };
+
+      const font1Id = addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+      const font2Id = addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+      const pageIds = [];
+      const pagesRootId = objects.length + 1 + pages.length * 2;
+
+      pages.forEach(streamStr => {
+        const contentId = addObj(`<< /Length ${streamStr.length} >>\nstream\n${streamStr}\nendstream`);
+        const pageId = addObj(`<< /Type /Page /Parent ${pagesRootId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font1Id} 0 R /F2 ${font2Id} 0 R >> >> /Contents ${contentId} 0 R >>`);
+        pageIds.push(pageId);
+      });
+
+      const actualPagesRootId = addObj(`<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(' ')}] /Count ${pageIds.length} >>`);
+      const catalogId = addObj(`<< /Type /Catalog /Pages ${actualPagesRootId} 0 R >>`);
+
+      let pdf = '%PDF-1.4\n';
+      const offsets = [0];
+      objects.forEach((obj, i) => {
+        offsets.push(pdf.length);
+        pdf += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+      });
+      const xrefStart = pdf.length;
+      pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+      for (let i = 1; i <= objects.length; i++) {
+        pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+      }
+      pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+
+      const pdfBytes = new Uint8Array(pdf.length);
+      for (let i = 0; i < pdf.length; i++) pdfBytes[i] = pdf.charCodeAt(i) & 0xFF;
+      downloadBlob(new Blob([pdfBytes], { type: 'application/pdf' }), `Relatorio_Financeiro_${selectedYear}.pdf`);
+      showToast(`Relatório Executivo .PDF de ${selectedYear} gerado!`, 'success');
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    /* =====================================================================
+       13. CRUD OPERATIONS (INSERT, EDIT, DELETE)
+       ===================================================================== */
+    function openEntryModal(year = selectedYear, month = CURRENT_MONTH) {
+      const years = getSortedYears();
+      const ySel = document.getElementById('entryYear');
+      const mSel = document.getElementById('entryMonth');
+      ySel.innerHTML = years.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('');
+      mSel.innerHTML = MONTHS.map((name, i) => `<option value="${i}" ${i === month ? 'selected' : ''}>${name}</option>`).join('');
+
+      loadModalValues(year, month);
+      document.getElementById('entryModalBackdrop').classList.add('open');
+    }
+
+    function loadModalValues(year, month) {
+      const rec = normalizeRecord(state.years[year]?.[month]);
+      const goal = parseNum(state.goals[year]?.[month]);
+      document.getElementById('f_anuidades_pf').value = rec.anuidades_pf ? fmtInputVal(rec.anuidades_pf) : '';
+      document.getElementById('f_anuidades_pj').value = rec.anuidades_pj ? fmtInputVal(rec.anuidades_pj) : '';
+      document.getElementById('f_autos_adm').value = rec.autos_adm ? fmtInputVal(rec.autos_adm) : '';
+      document.getElementById('f_autos_da').value = rec.autos_da ? fmtInputVal(rec.autos_da) : '';
+      document.getElementById('f_autos_manual').checked = !!rec.autos_manual;
+      document.getElementById('f_autos_total').readOnly = !rec.autos_manual;
+      document.getElementById('f_autos_total').value = rec.autos_total ? fmtInputVal(rec.autos_total) : '';
+      document.getElementById('entryGoal').value = goal ? fmtInputVal(goal) : '';
+      recomputeModalTotal();
+    }
+
+    function recomputeModalTotal() {
+      const pf = parseNum(document.getElementById('f_anuidades_pf').value);
+      const pj = parseNum(document.getElementById('f_anuidades_pj').value);
+      const adm = parseNum(document.getElementById('f_autos_adm').value);
+      const da = parseNum(document.getElementById('f_autos_da').value);
+      const isManual = document.getElementById('f_autos_manual').checked;
+      const autosEl = document.getElementById('f_autos_total');
+      autosEl.readOnly = !isManual;
+      const autosTotal = isManual ? parseNum(autosEl.value) : Math.round((adm + da) * 100) / 100;
+      if (!isManual) autosEl.value = autosTotal > 0 ? fmtInputVal(autosTotal) : '0,00';
+      document.getElementById('entryComputedTotal').textContent = fmtBRL(pf + pj + autosTotal);
+    }
+
+    function closeEntryModal() {
+      document.getElementById('entryModalBackdrop').classList.remove('open');
+    }
+
+    // ---- Custom In-Page Confirmation Modal (replaces blocked window.confirm) ----
+    let pendingConfirmAction = null;
+    function openConfirmModal({ title = 'Confirmar Exclusão', message, confirmLabel = 'Confirmar Exclusão', onConfirm }) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalMessage').textContent = message;
+      document.getElementById('btnConfirmProceed').textContent = confirmLabel;
+      pendingConfirmAction = onConfirm;
+      document.getElementById('confirmModalBackdrop').classList.add('open');
+    }
+    function closeConfirmModal() {
+      document.getElementById('confirmModalBackdrop').classList.remove('open');
+      pendingConfirmAction = null;
+    }
+
+    // ---- Delete Center Modal ----
+    function openDeleteCenterModal() {
+      const years = getSortedYears();
+      document.getElementById('delSelectYear').innerHTML = years.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`).join('');
+      document.getElementById('delSelectMonth').innerHTML = MONTHS.map((name, i) => `<option value="${i}" ${i === CURRENT_MONTH ? 'selected' : ''}>${name}</option>`).join('');
+      document.getElementById('delCenterYearLabel').textContent = selectedYear;
+      document.getElementById('deleteCenterModalBackdrop').classList.add('open');
+    }
+    function closeDeleteCenterModal() {
+      document.getElementById('deleteCenterModalBackdrop').classList.remove('open');
+    }
+
+    function deleteMonthEntry(year, month, onDone) {
+      openConfirmModal({
+        title: `Excluir ${MONTHS[month]}/${year}`,
+        message: `Deseja excluir todos os valores financeiros lançados em ${MONTHS[month]}/${year}?`,
+        confirmLabel: 'Excluir Mês',
+        onConfirm: () => {
+          state.years[year][month] = emptyMonthRecord();
+          saveState();
+          renderAll();
+          if (typeof onDone === 'function') onDone();
+          showToast(`Dados de ${MONTHS[month]}/${year} excluídos com sucesso.`, 'success');
+        }
+      });
+    }
+
+    function clearYearMonths(year, onDone) {
+      openConfirmModal({
+        title: `Zerar Meses de ${year}`,
+        message: `Deseja zerar todos os 12 meses de lançamentos do ano ${year}? As metas configuradas serão mantidas.`,
+        confirmLabel: `Zerar Meses de ${year}`,
+        onConfirm: () => {
+          state.years[year] = Array.from({ length: 12 }, () => emptyMonthRecord());
+          saveState();
+          renderAll();
+          if (typeof onDone === 'function') onDone();
+          showToast(`Todos os lançamentos de ${year} foram zerados.`, 'success');
+        }
+      });
+    }
+
+    function clearYearGoals(year, onDone) {
+      openConfirmModal({
+        title: `Excluir Metas de ${year}`,
+        message: `Deseja excluir todas as metas mensais cadastradas para ${year}?`,
+        confirmLabel: `Excluir Metas de ${year}`,
+        onConfirm: () => {
+          state.goals[year] = Array(12).fill(0);
+          saveState();
+          renderAll();
+          if (typeof onDone === 'function') onDone();
+          showToast(`Metas de ${year} excluídas com sucesso.`, 'success');
+        }
+      });
+    }
+
+    function clearAllData(onDone) {
+      openConfirmModal({
+        title: 'Zerar Toda a Base',
+        message: 'Deseja limpar todos os valores e metas de todos os anos (2023–2026+) para iniciar com a base 100% zerada?',
+        confirmLabel: 'Sim, Zerar Tudo',
+        onConfirm: () => {
+          getSortedYears().forEach(y => {
+            state.years[y] = Array.from({ length: 12 }, () => emptyMonthRecord());
+            state.goals[y] = Array.from({ length: 12 }, () => 0);
+          });
+          state.isDemo = false;
+          saveState();
+          renderAll();
+          if (typeof onDone === 'function') onDone();
+          showToast('Base zerada! Pronto para receber seus lançamentos ou importações.', 'success');
+        }
+      });
+    }
+
+    function addNextYear() {
+      const years = getSortedYears();
+      const nextY = (years[years.length - 1] || CURRENT_YEAR) + 1;
+      state.years[nextY] = Array.from({ length: 12 }, () => emptyMonthRecord());
+      const prevGoals = state.goals[nextY - 1] || Array(12).fill(0);
+      state.goals[nextY] = prevGoals.map((g, m) => {
+        const base = parseNum(g) || getMonthTotal(state.years[nextY - 1]?.[m]);
+        return base > 0 ? Math.round(base * 1.10) : 0;
+      });
+      if (Array.isArray(state.deletedYears)) {
+        state.deletedYears = state.deletedYears.filter(y => y !== nextY);
+      }
+      selectedYear = nextY;
+      saveState();
+      renderAll();
+      showToast(`Ano ${nextY} adicionado com metas iniciais projetadas!`, 'success');
+    }
+
+    function deleteSelectedYear(onDone) {
+      const years = getSortedYears();
+      if (years.length <= 1) {
+        showToast('É necessário manter pelo menos um ano no dashboard.', 'error');
+        return;
+      }
+      const targetYear = selectedYear;
+      openConfirmModal({
+        title: `Excluir Ano ${targetYear}`,
+        message: `Tem certeza que deseja excluir o ano ${targetYear}, todos os seus lançamentos mensais e suas metas?`,
+        confirmLabel: `Excluir Ano ${targetYear}`,
+        onConfirm: () => {
+          delete state.years[targetYear];
+          delete state.goals[targetYear];
+          if (!Array.isArray(state.deletedYears)) state.deletedYears = [];
+          if (!state.deletedYears.includes(targetYear)) state.deletedYears.push(targetYear);
+          const rem = getSortedYears();
+          selectedYear = rem[rem.length - 1];
+          saveState();
+          renderAll();
+          if (typeof onDone === 'function') onDone();
+          showToast(`Ano ${targetYear} excluído com sucesso.`, 'success');
+        }
+      });
+    }
+
+    function autoGenerateGoals() {
+      const pct = parseFloat(document.getElementById('autoGoalGrowthPct').value) || 10;
+      const mult = 1 + pct / 100;
+      const prevYear = selectedYear - 1;
+      const prevRecs = state.years[prevYear];
+      const curRecs = state.years[selectedYear];
+      const avgCur = getYearTotals(selectedYear).filledMonths > 0
+        ? getYearTotals(selectedYear).total / getYearTotals(selectedYear).filledMonths
+        : 650000;
+
+      for (let m = 0; m < 12; m++) {
+        const basePrev = getMonthTotal(prevRecs?.[m]);
+        const baseGoalPrev = parseNum(state.goals[prevYear]?.[m]);
+        const baseCur = getMonthTotal(curRecs?.[m]);
+        const ref = basePrev > 0 ? basePrev : (baseGoalPrev > 0 ? baseGoalPrev : (baseCur > 0 ? baseCur : avgCur));
+        state.goals[selectedYear][m] = Math.round(ref * mult);
+      }
+      saveState();
+      renderAll();
+      showToast(`Metas de ${selectedYear} recalculadas com crescimento de ${pct >= 0 ? '+' : ''}${pct}% sobre a sazonalidade histórica!`, 'success');
+    }
+
+    /* =====================================================================
+       14. EVENT LISTENERS & MASTER RENDER
+       ===================================================================== */
+    function renderAll() {
+      renderHeaderControls();
+      renderOverview();
+      renderMonthly();
+      renderAnnual();
+      renderGoals();
+      renderDriveLinks();
+    }
+
+    function bindEvents() {
+      // Navigation tabs
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeTab = btn.dataset.tab;
+          document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b === btn));
+          document.querySelectorAll('.tab-section').forEach(sec => sec.classList.toggle('active', sec.id === `tab-${activeTab}`));
+        });
+      });
+
+      // Header actions
+      document.getElementById('btnOpenInsert').addEventListener('click', () => openEntryModal(selectedYear, CURRENT_MONTH));
+      document.getElementById('btnOpenDelete').addEventListener('click', openDeleteCenterModal);
+      document.getElementById('btnInsertFromTable').addEventListener('click', () => openEntryModal(selectedYear, CURRENT_MONTH));
+      document.getElementById('btnExportPDF').addEventListener('click', exportPdfReport);
+      document.getElementById('btnExportXLSX').addEventListener('click', exportXlsxReport);
+      document.getElementById('btnPrintView').addEventListener('click', () => window.print());
+
+      document.getElementById('compareYearSelect').addEventListener('change', e => {
+        compareYear = Number(e.target.value);
+        renderAll();
+      });
+      document.getElementById('btnAddNextYear').addEventListener('click', addNextYear);
+      document.getElementById('btnDeleteYear').addEventListener('click', () => deleteSelectedYear());
+
+      // Confirmation modal controls
+      document.getElementById('btnCloseConfirmModal').addEventListener('click', closeConfirmModal);
+      document.getElementById('btnConfirmCancel').addEventListener('click', closeConfirmModal);
+      document.getElementById('confirmModalBackdrop').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeConfirmModal();
+      });
+      document.getElementById('btnConfirmProceed').addEventListener('click', () => {
+        const fn = pendingConfirmAction;
+        closeConfirmModal();
+        if (typeof fn === 'function') fn();
+      });
+
+      // Delete Center modal controls
+      document.getElementById('btnCloseDeleteCenter').addEventListener('click', closeDeleteCenterModal);
+      document.getElementById('btnCancelDeleteCenter').addEventListener('click', closeDeleteCenterModal);
+      document.getElementById('deleteCenterModalBackdrop').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeDeleteCenterModal();
+      });
+      document.getElementById('btnExecDeleteMonth').addEventListener('click', () => {
+        const y = Number(document.getElementById('delSelectYear').value);
+        const m = Number(document.getElementById('delSelectMonth').value);
+        deleteMonthEntry(y, m, closeDeleteCenterModal);
+      });
+      document.getElementById('btnExecClearYearMonths').addEventListener('click', () => {
+        clearYearMonths(selectedYear, closeDeleteCenterModal);
+      });
+      document.getElementById('btnExecClearYearGoals').addEventListener('click', () => {
+        clearYearGoals(selectedYear, closeDeleteCenterModal);
+      });
+      document.getElementById('btnExecDeleteWholeYear').addEventListener('click', () => {
+        deleteSelectedYear(closeDeleteCenterModal);
+      });
+      document.getElementById('btnExecClearEverything').addEventListener('click', () => {
+        clearAllData(closeDeleteCenterModal);
+      });
+
+      // ESC closes active modal
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          if (document.getElementById('confirmModalBackdrop').classList.contains('open')) closeConfirmModal();
+          else if (document.getElementById('deleteCenterModalBackdrop').classList.contains('open')) closeDeleteCenterModal();
+          else if (document.getElementById('entryModalBackdrop').classList.contains('open')) closeEntryModal();
+        }
+      });
+
+      // Demo Banner
+      document.getElementById('btnDismissDemo').addEventListener('click', () => {
+        state.demoBannerDismissed = true;
+        saveState();
+        renderHeaderControls();
+      });
+      document.getElementById('btnClearAllData').addEventListener('click', () => clearAllData());
+      document.getElementById('btnClearYearMonths').addEventListener('click', () => clearYearMonths(selectedYear));
+
+      // Entry Modal events
+      document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
+      document.getElementById('btnCancelEntryModal').addEventListener('click', closeEntryModal);
+      document.getElementById('entryModalBackdrop').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeEntryModal();
+      });
+      document.getElementById('entryYear').addEventListener('change', () => {
+        loadModalValues(Number(document.getElementById('entryYear').value), Number(document.getElementById('entryMonth').value));
+      });
+      document.getElementById('entryMonth').addEventListener('change', () => {
+        loadModalValues(Number(document.getElementById('entryYear').value), Number(document.getElementById('entryMonth').value));
+      });
+      ['f_anuidades_pf', 'f_anuidades_pj', 'f_autos_adm', 'f_autos_da', 'f_autos_total', 'f_autos_manual'].forEach(id => {
+        document.getElementById(id).addEventListener('input', recomputeModalTotal);
+        document.getElementById(id).addEventListener('change', recomputeModalTotal);
+      });
+
+      document.getElementById('btnDeleteEntryInModal').addEventListener('click', () => {
+        const y = Number(document.getElementById('entryYear').value);
+        const m = Number(document.getElementById('entryMonth').value);
+        deleteMonthEntry(y, m, closeEntryModal);
+      });
+
+      document.getElementById('entryForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const y = Number(document.getElementById('entryYear').value);
+        const m = Number(document.getElementById('entryMonth').value);
+        const isManual = document.getElementById('f_autos_manual').checked;
+        state.years[y][m] = normalizeRecord({
+          anuidades_pf: parseNum(document.getElementById('f_anuidades_pf').value),
+          anuidades_pj: parseNum(document.getElementById('f_anuidades_pj').value),
+          autos_adm: parseNum(document.getElementById('f_autos_adm').value),
+          autos_da: parseNum(document.getElementById('f_autos_da').value),
+          autos_total: parseNum(document.getElementById('f_autos_total').value),
+          autos_manual: isManual
+        });
+        const gVal = parseNum(document.getElementById('entryGoal').value);
+        if (gVal > 0 || document.getElementById('entryGoal').value.trim() === '0') {
+          state.goals[y][m] = gVal;
+        }
+        selectedYear = y;
+        state.isDemo = false;
+        saveState();
+        closeEntryModal();
+        renderAll();
+        showToast(`Lançamento de ${MONTHS[m]}/${y} salvo com sucesso!`, 'success');
+      });
+
+      // Goals events
+      document.getElementById('btnAutoGenerateGoals').addEventListener('click', autoGenerateGoals);
+      document.getElementById('btnDeleteYearGoals').addEventListener('click', () => clearYearGoals(selectedYear));
+
+      // Import XLSX / CSV
+      const xlsxInput = document.getElementById('fileInputXlsx');
+      document.getElementById('btnPickXlsx').addEventListener('click', () => xlsxInput.click());
+      document.getElementById('btnDownloadTemplate').addEventListener('click', downloadTemplateXlsx);
+
+      async function handleXlsxUpload(file) {
+        if (!file) return;
+        const defYear = Number(document.getElementById('importDefaultYear').value) || selectedYear;
+        try {
+          let extracted = [];
+          if (/\.xlsx$/i.test(file.name)) {
+            const buf = await file.arrayBuffer();
+            extracted = await parseXlsxFile(buf, defYear);
+          } else {
+            const txt = await file.text();
+            extracted = extractFromFreeText(txt, defYear);
+          }
+          presentExtractionPreview(extracted, file.name);
+        } catch (err) {
+          showToast(`Erro ao ler planilha: ${err.message}`, 'error');
+        }
+      }
+      xlsxInput.addEventListener('change', e => { handleXlsxUpload(e.target.files[0]); xlsxInput.value = ''; });
+      setupDropzone('dropzoneXlsx', handleXlsxUpload);
+
+      // Import PDF
+      const pdfInput = document.getElementById('fileInputPdf');
+      document.getElementById('btnPickPdf').addEventListener('click', () => pdfInput.click());
+      async function handlePdfUpload(file) {
+        if (!file) return;
+        const defYear = Number(document.getElementById('importDefaultYear').value) || selectedYear;
+        try {
+          const buf = await file.arrayBuffer();
+          const extracted = await parsePdfFile(buf, defYear);
+          presentExtractionPreview(extracted, file.name);
+        } catch (err) {
+          showToast(`Erro ao ler PDF: ${err.message}`, 'error');
+        }
+      }
+      pdfInput.addEventListener('change', e => { handlePdfUpload(e.target.files[0]); pdfInput.value = ''; });
+      setupDropzone('dropzonePdf', handlePdfUpload);
+
+      // Drive Import
+      document.getElementById('btnFetchDrive').addEventListener('click', handleDriveImport);
+      document.getElementById('btnSaveDriveLink').addEventListener('click', () => {
+        const url = document.getElementById('driveUrlInput').value.trim();
+        const label = document.getElementById('driveLabelInput').value.trim();
+        if (!url) { showToast('Cole um link do Google Drive primeiro.', 'error'); return; }
+        state.driveLinks.unshift({ url, label: label || 'Link Google Drive', addedAt: new Date().toISOString() });
+        saveState();
+        renderDriveLinks();
+        showToast('Link salvo na sua lista do Google Drive!', 'success');
+      });
+
+      // Raw Text Intelligent Parse
+      document.getElementById('btnParseRawText').addEventListener('click', () => {
+        const txt = document.getElementById('rawTextInput').value.trim();
+        const defYear = Number(document.getElementById('importDefaultYear').value) || selectedYear;
+        if (!txt) { showToast('Cole algum conteúdo ou tabela no campo acima primeiro.', 'error'); return; }
+        const extracted = extractFromFreeText(txt, defYear);
+        presentExtractionPreview(extracted, 'Texto Inteligente');
+      });
+
+      document.getElementById('btnConfirmImport').addEventListener('click', confirmPendingImport);
+      document.getElementById('btnCancelImport').addEventListener('click', () => {
+        pendingImportRows = [];
+        document.getElementById('extractionPreviewPanel').style.display = 'none';
+      });
+
+      // JSON Backup / Restore / Demo
+      document.getElementById('btnExportJSON').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        downloadBlob(blob, `Backup_Dashboard_Financeiro_${new Date().toISOString().slice(0, 10)}.json`);
+        showToast('Backup .JSON exportado com sucesso!', 'success');
+      });
+      const jsonInput = document.getElementById('fileInputJson');
+      document.getElementById('btnImportJSON').addEventListener('click', () => jsonInput.click());
+      jsonInput.addEventListener('change', async e => {
+        const f = e.target.files[0];
+        if (!f) return;
+        try {
+          const parsed = JSON.parse(await f.text());
+          if (!parsed.years) throw new Error('Estrutura JSON inválida.');
+          ensureDynamicCalendarYears(parsed);
+          state = parsed;
+          saveState();
+          renderAll();
+          showToast('Backup restaurado com sucesso!', 'success');
+        } catch (err) {
+          showToast(`Falha ao restaurar JSON: ${err.message}`, 'error');
+        }
+        jsonInput.value = '';
+      });
+      document.getElementById('btnRestoreDemo').addEventListener('click', () => {
+        openConfirmModal({
+          title: 'Restaurar Dados de Exemplo',
+          message: 'Deseja restaurar a base ilustrativa (2023–2026+)? Isso substituirá os dados atuais.',
+          confirmLabel: 'Restaurar Exemplo',
+          onConfirm: () => {
+            state = buildDemoState();
+            saveState();
+            renderAll();
+            showToast('Dados de demonstração restaurados.', 'info');
+          }
+        });
+      });
+    }
+
+    function setupDropzone(id, onFile) {
+      const dz = document.getElementById(id);
+      ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+      ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+      dz.addEventListener('drop', e => {
+        const file = e.dataTransfer?.files?.[0];
+        if (file) onFile(file);
+      });
+    }
+
+    // Boot Application
+    state = loadState();
+    bindEvents();
+    renderAll();
+  })();
+  </script>
+</body>
+</html>
