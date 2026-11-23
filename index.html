@@ -1098,24 +1098,38 @@
 
         <!-- Google Drive Link Import -->
         <div class="dropzone" id="dropzoneDrive" style="text-align:left;align-items:stretch;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="drop-icon" style="flex-shrink:0;">DRIVE</div>
-            <div>
-              <div style="font-weight:750;font-size:0.95rem;">Importar via Link do Google Drive</div>
-              <div class="helper-note">Cole link do Google Sheets, Docs ou PDF no Drive.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="drop-icon" style="flex-shrink:0;">DRIVE</div>
+              <div>
+                <div style="font-weight:750;font-size:0.95rem;">Alimentar via Link do Google Drive</div>
+                <div class="helper-note">Leitura direta (zero-CORS) de Google Sheets, Docs, PDFs, XLSX ou Pastas.</div>
+              </div>
             </div>
+            <span class="status-badge status-hit" id="driveConnectorBadge" style="display:none;">Conector Ativo</span>
           </div>
           <div class="field">
-            <label for="driveUrlInput">URL do Google Drive / Sheets</label>
+            <label for="driveUrlInput">Link do Google Drive / Google Sheets / Pasta</label>
             <input type="url" class="input" id="driveUrlInput" placeholder="https://docs.google.com/spreadsheets/d/... ou drive.google.com/file/d/..." />
           </div>
-          <div class="field">
-            <label for="driveLabelInput">Descrição / Referência (opcional)</label>
-            <input type="text" class="input input-sm" id="driveLabelInput" placeholder="Ex.: Relatório Arrecadação 2026" />
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="field">
+              <label for="driveSheetNameInput">Aba(s) (opcional)</label>
+              <input type="text" class="input input-sm" id="driveSheetNameInput" placeholder="Ex.: 2026 ou 2023,2024,2025,2026" />
+            </div>
+            <div class="field">
+              <label for="driveLabelInput">Nome / Referência</label>
+              <input type="text" class="input input-sm" id="driveLabelInput" placeholder="Ex.: Planilha Anual 2023-2026" />
+            </div>
           </div>
+          <label style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" id="chkDriveAutoApply" checked />
+            Alimentar o dashboard automaticamente após extrair (sem etapa extra)
+          </label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-sm" id="btnFetchDrive">Ler e Extrair do Drive</button>
+            <button class="btn btn-primary btn-sm" id="btnFetchDrive">Extrair e Alimentar</button>
             <button class="btn btn-secondary btn-sm" id="btnSaveDriveLink">Salvar Link</button>
+            <button class="btn btn-ghost btn-sm" id="btnOpenAppsScriptModal" title="Configurar leitura de PDFs, XLSX, Pastas e arquivos privados do Drive">Conector PDF/Privados</button>
           </div>
         </div>
       </div>
@@ -1125,7 +1139,7 @@
         <div class="panel-header">
           <div>
             <div class="panel-title">Extração Inteligente via Texto / Conteúdo Copiado</div>
-            <div class="panel-desc">Cole qualquer tabela copiada do Google Sheets, Excel ou PDF (útil para arquivos privados do Drive) e clique em Extrair</div>
+            <div class="panel-desc">Cole qualquer tabela copiada do Google Sheets, Excel ou PDF e clique em Extrair</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <label style="font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
@@ -1164,8 +1178,15 @@
         <div class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-title">Links do Google Drive Salvos</div>
-              <div class="panel-desc">Acesso rápido aos seus arquivos e pastas financeiras</div>
+              <div class="panel-title">Fontes do Google Drive Conectadas</div>
+              <div class="panel-desc">Sincronize seus links salvos para manter o dashboard sempre atualizado</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <label style="font-size:0.74rem;color:var(--text-secondary);display:flex;align-items:center;gap:5px;cursor:pointer;">
+                <input type="checkbox" id="chkAutoSyncDrive" />
+                Auto-sincronizar ao abrir
+              </label>
+              <button class="btn btn-primary btn-sm" id="btnSyncAllDrive">Sincronizar Todos</button>
             </div>
           </div>
           <div id="savedDriveLinksList"></div>
@@ -1323,6 +1344,48 @@
       <div class="modal-foot">
         <button type="button" class="btn btn-ghost" id="btnConfirmCancel">Cancelar</button>
         <button type="button" class="btn btn-danger" id="btnConfirmProceed">Confirmar Exclusão</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Drive Apps Script Connector Modal -->
+  <div class="modal-backdrop" id="appsScriptModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="appsScriptModalTitle">
+    <div class="modal" style="max-width:740px;">
+      <div class="modal-head">
+        <div>
+          <h2 id="appsScriptModalTitle" style="font-size:1.08rem;font-weight:780;color:#ffb46e;">Conector Google Drive (PDFs, XLSX, Pastas e Arquivos Privados)</h2>
+          <div class="helper-note">Planilhas do Google Sheets com link público já funcionam direto sem conector! Configure este conector gratuito (na sua própria conta Google) para ler também <strong>PDFs, arquivos .XLSX, Google Docs, pastas inteiras</strong> e <strong>arquivos privados</strong> direto pelo link do Drive.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btnCloseAppsScriptModal">Fechar</button>
+      </div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label for="appsScriptUrlInput">URL do seu Web App Google Apps Script (termina em <code>/exec</code>)</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="url" class="input" id="appsScriptUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" style="flex:1;min-width:240px;" />
+          <button type="button" class="btn btn-primary btn-sm" id="btnSaveAppsScriptUrl">Salvar Conector</button>
+          <button type="button" class="btn btn-danger btn-sm" id="btnClearAppsScriptUrl">Remover</button>
+        </div>
+      </div>
+
+      <div style="padding:12px 14px;border-radius:12px;background:rgba(255,94,0,0.08);border:1px solid rgba(255,102,26,0.28);margin-bottom:12px;font-size:0.79rem;color:#f3d7cd;line-height:1.55;">
+        <strong>Como ativar em 1 minuto (100% gratuito e privado na sua conta Google):</strong><br/>
+        1. Acesse <a href="https://script.google.com/" target="_blank" rel="noopener noreferrer" style="color:#ff9d5c;font-weight:700;">script.google.com</a> e clique em <strong>Novo projeto</strong>.<br/>
+        2. Cole o código abaixo (substituindo tudo no editor) e clique em <strong>Salvar</strong>.<br/>
+        3. Clique em <strong>Implantar → Nova implantação → App da Web</strong>. Em <em>Executar como</em> deixe <strong>Eu</strong> e em <em>Quem pode acessar</em> selecione <strong>Qualquer pessoa</strong>.<br/>
+        4. Autorize o acesso ao seu Drive, copie a URL gerada (<code>.../exec</code>) e cole no campo acima!
+      </div>
+
+      <div class="field">
+        <label style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Código do Conector Google Apps Script (<code>Code.gs</code>)</span>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnCopyAppsScriptCode">Copiar Código</button>
+        </label>
+        <textarea class="input mono" id="appsScriptCodePreview" rows="10" readonly style="font-size:0.74rem;line-height:1.45;"></textarea>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="btnCancelAppsScriptModal">Fechar</button>
       </div>
     </div>
   </div>
@@ -2621,29 +2684,42 @@
        ===================================================================== */
     function renderDriveLinks() {
       const box = document.getElementById('savedDriveLinksList');
+      const badge = document.getElementById('driveConnectorBadge');
+      const autoChk = document.getElementById('chkAutoSyncDrive');
+      if (badge) badge.style.display = state.appsScriptUrl ? 'inline-flex' : 'none';
+      if (autoChk) autoChk.checked = !!state.autoSyncDrive;
+
       const list = state.driveLinks || [];
       if (!list.length) {
-        box.innerHTML = `<div class="helper-note">Nenhum link do Google Drive salvo ainda. Cole uma URL acima e clique em <strong>Salvar Link</strong> ou <strong>Ler e Extrair do Drive</strong>.</div>`;
+        box.innerHTML = `<div class="helper-note">Nenhum link do Google Drive conectado ainda. Cole um link acima e clique em <strong>Extrair e Alimentar</strong> ou <strong>Salvar Link</strong> para sincronizar seus relatórios sempre que precisar.</div>`;
         return;
       }
-      box.innerHTML = list.map((item, idx) => `
+      box.innerHTML = list.map((item, idx) => {
+        const syncedTxt = item.lastSyncedAt
+          ? `Sincronizado em ${new Date(item.lastSyncedAt).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}`
+          : 'Ainda não sincronizado';
+        const sheetsTag = item.sheetNames ? ` · Abas: ${escapeHtml(item.sheetNames)}` : '';
+        return `
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,86,36,0.07);border:1px solid rgba(255,98,36,0.2);margin-bottom:8px;">
           <div style="min-width:0;">
             <div style="font-weight:700;font-size:0.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.label || 'Arquivo Google Drive')}</div>
-            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.74rem;color:#ff9d5c;text-decoration:none;word-break:break-all;">${escapeHtml(item.url)}</a>
+            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.73rem;color:#ff9d5c;text-decoration:none;word-break:break-all;">${escapeHtml(item.url)}</a>
+            <div style="font-size:0.71rem;color:var(--text-muted);margin-top:2px;">${syncedTxt}${sheetsTag}</div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0;">
-            <button class="btn btn-secondary btn-sm" data-reimport-drive="${idx}">Extrair</button>
+            <button class="btn btn-secondary btn-sm" data-reimport-drive="${idx}">Sincronizar</button>
             <button class="btn btn-danger btn-sm" data-del-drive="${idx}">Excluir</button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       box.querySelectorAll('[data-reimport-drive]').forEach(b => {
         b.addEventListener('click', () => {
           const item = state.driveLinks[Number(b.dataset.reimportDrive)];
           document.getElementById('driveUrlInput').value = item.url;
-          document.getElementById('driveLabelInput').value = item.label;
+          document.getElementById('driveLabelInput').value = item.label || '';
+          document.getElementById('driveSheetNameInput').value = item.sheetNames || '';
           handleDriveImport();
         });
       });
@@ -2666,13 +2742,23 @@
     ];
 
     function detectMonthIndex(text) {
-      const s = stripAccents(text);
+      const raw = String(text || '').trim();
+      // Google Visualization Date(YYYY, M, D) where M is 0-indexed
+      const gvizDate = raw.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})\)$/i);
+      if (gvizDate) {
+        const m = Number(gvizDate[2]);
+        if (m >= 0 && m <= 11) return m;
+      }
+      const s = stripAccents(raw);
       for (let i = 0; i < 12; i++) {
         for (const p of MONTH_PATTERNS[i]) {
           const re = new RegExp(`(^|[^a-z])${stripAccents(p)}([^a-z]|$)`, 'i');
           if (re.test(s)) return i;
         }
       }
+      // dd/mm/yyyy (Brazilian date like 01/03/2026)
+      const brDate = s.match(/\b\d{1,2}\/(0?[1-9]|1[0-2])\/(20[2-3]\d)\b/);
+      if (brDate) return Number(brDate[1]) - 1;
       const numMatch = s.match(/\b(0?[1-9]|1[0-2])\s*[\/\-]\s*(20[2-3]\d)\b/);
       if (numMatch) return Number(numMatch[1]) - 1;
       const isoMatch = s.match(/\b(20[2-3]\d)\s*[\-\/]\s*(0?[1-9]|1[0-2])\b/);
@@ -2681,8 +2767,14 @@
     }
 
     function detectYearInText(text, fallbackYear) {
-      const m = String(text || '').match(/\b(20[2-3]\d)\b/);
-      return m ? Number(m[1]) : fallbackYear;
+      const raw = String(text || '').trim();
+      const gvizDate = raw.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})\)$/i);
+      if (gvizDate) return Number(gvizDate[1]);
+      const m = raw.match(/\b(20[2-3]\d)\b/);
+      if (m) return Number(m[1]);
+      const shortY = raw.match(/[\/\-](2[3-9]|3\d)\b/);
+      if (shortY) return 2000 + Number(shortY[1]);
+      return fallbackYear;
     }
 
     function classifyCategory(headerText) {
@@ -3100,76 +3192,451 @@
       return extractFromFreeText(fullText, defaultYear);
     }
 
-    // ---- Google Drive URL Converter & Importer ----
+    // ---- Google Drive 4-Layer Autonomous Extraction Engine (Zero-CORS) ----
+    const APPS_SCRIPT_TEMPLATE = `/**
+ * Conector Acompanhamento Financeiro — Google Drive (Code.gs)
+ * Lê Google Sheets (todas as abas), PDFs, XLSX, CSV, Docs e Pastas inteiras do seu Drive.
+ */
+function doGet(e) {
+  var cb = (e && e.parameter && e.parameter.callback) ? e.parameter.callback : '';
+  var url = (e && e.parameter && e.parameter.url) ? e.parameter.url : '';
+  var res;
+  try {
+    res = { ok: true, items: extractByUrl_(url) };
+  } catch (err) {
+    res = { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+  var json = JSON.stringify(res);
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + json + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function extractByUrl_(url) {
+  var folderMatch = url.match(/\\/folders\\/([a-zA-Z0-9_-]+)/);
+  if (folderMatch) {
+    var folder = DriveApp.getFolderById(folderMatch[1]);
+    var files = folder.getFiles();
+    var out = [];
+    while (files.hasNext() && out.length < 25) {
+      var f = files.next();
+      try { out = out.concat(readSingleFile_(f)); } catch (e) {}
+    }
+    return out;
+  }
+  var idMatch = url.match(/\\/(?:d|file\\/d)\\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (!idMatch) throw new Error('ID do arquivo/pasta não identificado no link.');
+  return readSingleFile_(DriveApp.getFileById(idMatch[1]));
+}
+
+function readSingleFile_(file) {
+  var mime = file.getMimeType();
+  var name = file.getName();
+  if (mime === MimeType.GOOGLE_SHEETS) {
+    var ss = SpreadsheetApp.openById(file.getId());
+    return ss.getSheets().map(function(sh) {
+      var vals = sh.getDataRange().getDisplayValues();
+      return { kind: 'matrix', name: name + ' [' + sh.getName() + ']', tab: sh.getName(), rows: vals };
+    });
+  }
+  if (mime === MimeType.GOOGLE_DOCS) {
+    var txt = DocumentApp.openById(file.getId()).getBody().getText();
+    return [{ kind: 'text', name: name, text: txt }];
+  }
+  var blob = file.getBlob();
+  if (mime === MimeType.PDF || /\\.pdf$/i.test(name)) {
+    return [{ kind: 'pdf_b64', name: name, data: Utilities.base64Encode(blob.getBytes()) }];
+  }
+  if (/spreadsheetml|excel|\\.xlsx$/i.test(mime + name)) {
+    return [{ kind: 'xlsx_b64', name: name, data: Utilities.base64Encode(blob.getBytes()) }];
+  }
+  return [{ kind: 'text', name: name, text: blob.getDataAsString('UTF-8') }];
+}`;
+
     function parseDriveUrl(url) {
       const s = String(url || '').trim();
-      const sheetMatch = s.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+      // Published Google Sheet (/spreadsheets/d/e/2PACX-...)
+      const pubSheetMatch = s.match(/docs\.google\.com\/spreadsheets(?:\/u\/\d+)?\/d\/e\/([a-zA-Z0-9_-]+)/);
+      if (pubSheetMatch) {
+        const pubId = pubSheetMatch[1];
+        const gidMatch = s.match(/gid=(\d+)/);
+        const gid = gidMatch ? `&gid=${gidMatch[1]}&single=true` : '';
+        return {
+          type: 'published_sheets',
+          id: pubId,
+          gid: gidMatch ? gidMatch[1] : null,
+          exportUrl: `https://docs.google.com/spreadsheets/d/e/${pubId}/pub?output=csv${gid}`,
+          downloadUrl: `https://docs.google.com/spreadsheets/d/e/${pubId}/pub?output=xlsx`
+        };
+      }
+      // Standard Google Sheet (/spreadsheets/d/{ID} or /spreadsheets/u/0/d/{ID})
+      const sheetMatch = s.match(/docs\.google\.com\/spreadsheets(?:\/u\/\d+)?\/d\/([a-zA-Z0-9_-]+)/);
       if (sheetMatch) {
         const id = sheetMatch[1];
         const gidMatch = s.match(/gid=(\d+)/);
-        const gid = gidMatch ? `&gid=${gidMatch[1]}` : '';
-        return { type: 'sheets', id, exportUrl: `https://docs.google.com/spreadsheets/d/${id}/export?format=csv${gid}`, downloadUrl: `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx` };
+        const gid = gidMatch ? gidMatch[1] : null;
+        return {
+          type: 'sheets',
+          id,
+          gid,
+          exportUrl: `https://docs.google.com/spreadsheets/d/${id}/export?format=csv${gid ? '&gid=' + gid : ''}`,
+          downloadUrl: `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
+        };
       }
-      const docMatch = s.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/);
+      // Google Docs
+      const docMatch = s.match(/docs\.google\.com\/document(?:\/u\/\d+)?\/d\/([a-zA-Z0-9_-]+)/);
       if (docMatch) {
         const id = docMatch[1];
-        return { type: 'docs', id, exportUrl: `https://docs.google.com/document/d/${id}/export?format=txt`, downloadUrl: `https://docs.google.com/document/d/${id}/export?format=txt` };
+        return {
+          type: 'docs',
+          id,
+          exportUrl: `https://docs.google.com/document/d/${id}/export?format=txt`,
+          downloadUrl: `https://docs.google.com/document/d/${id}/export?format=txt`
+        };
       }
-      const fileMatch = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/);
+      // Google Drive Folder
+      const folderMatch = s.match(/drive\.google\.com\/drive(?:\/u\/\d+)?\/folders\/([a-zA-Z0-9_-]+)/);
+      if (folderMatch) {
+        const id = folderMatch[1];
+        return {
+          type: 'folder',
+          id,
+          exportUrl: s,
+          downloadUrl: s
+        };
+      }
+      // Google Drive File (/file/d/{ID}, /open?id=, /uc?id=)
+      const fileMatch = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([a-zA-Z0-9_-]+)/);
       if (fileMatch) {
         const id = fileMatch[1];
-        return { type: 'file', id, exportUrl: `https://drive.google.com/uc?export=download&id=${id}`, downloadUrl: `https://drive.google.com/uc?export=download&id=${id}` };
+        return {
+          type: 'file',
+          id,
+          exportUrl: `https://drive.google.com/uc?export=download&id=${id}`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`
+        };
       }
       return null;
+    }
+
+    function base64ToArrayBuffer(b64) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes.buffer;
+    }
+
+    function loadJsonp(url, callbackParamName = 'callback', timeoutMs = 15000) {
+      return new Promise((resolve, reject) => {
+        const cbName = '__afDriveCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const script = document.createElement('script');
+        let done = false;
+        const cleanup = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          try { delete window[cbName]; } catch { window[cbName] = undefined; }
+          if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error('Tempo limite excedido ao ler o link do Google Drive.'));
+        }, timeoutMs);
+
+        window[cbName] = data => {
+          cleanup();
+          resolve(data);
+        };
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('Não foi possível acessar o link diretamente (verifique se o compartilhamento está como "Qualquer pessoa com o link").'));
+        };
+        const sep = url.includes('?') ? '&' : '?';
+        script.src = callbackParamName === 'gviz'
+          ? `${url}${sep}tqx=out:json;responseHandler:${cbName}`
+          : `${url}${sep}${callbackParamName}=${cbName}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    function gvizTableToMatrix(gvizResp) {
+      if (!gvizResp || gvizResp.status === 'error' || !gvizResp.table) {
+        const msg = gvizResp?.errors?.[0]?.detailed_message || gvizResp?.errors?.[0]?.message || 'Resposta inválida do Google Sheets.';
+        throw new Error(msg);
+      }
+      const cols = gvizResp.table.cols || [];
+      const rows = [];
+      const headerLabels = cols.map(c => c.label || '');
+      if (headerLabels.some(l => String(l).trim() !== '')) {
+        rows.push(headerLabels);
+      }
+      (gvizResp.table.rows || []).forEach(r => {
+        const rowArr = (r.c || []).map(cell => {
+          if (!cell) return '';
+          if (typeof cell.v === 'string' && /^Date\(\d{4},\s*\d{1,2},\s*\d{1,2}\)$/i.test(cell.v)) {
+            return cell.f || cell.v;
+          }
+          if (typeof cell.v === 'number') return cell.v;
+          return cell.f ?? cell.v ?? '';
+        });
+        if (rowArr.some(v => v !== '' && v !== null && v !== undefined)) rows.push(rowArr);
+      });
+      return rows;
+    }
+
+    async function fetchGvizSheetMatrix(sheetId, { gid = null, sheetName = null } = {}) {
+      let base = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq`;
+      const qs = [];
+      if (sheetName) qs.push(`sheet=${encodeURIComponent(sheetName)}`);
+      else if (gid) qs.push(`gid=${encodeURIComponent(gid)}`);
+      if (qs.length) base += '?' + qs.join('&');
+      const resp = await loadJsonp(base, 'gviz', 12000);
+      return gvizTableToMatrix(resp);
+    }
+
+    function mergeExtractedLists(lists) {
+      const byKey = new Map();
+      lists.forEach(item => {
+        const key = `${item.year}-${item.month}`;
+        if (!byKey.has(key)) {
+          byKey.set(key, Object.assign({}, item));
+        } else {
+          const prev = byKey.get(key);
+          ['anuidades_pf', 'anuidades_pj', 'autos_adm', 'autos_da', 'autos_total', 'goal'].forEach(k => {
+            if (item[k] > 0) prev[k] = item[k];
+          });
+          if (prev.autos_adm > 0 || prev.autos_da > 0) {
+            prev.autos_total = Math.round((prev.autos_adm + prev.autos_da) * 100) / 100;
+          }
+        }
+      });
+      return Array.from(byKey.values()).sort((a, b) => a.year - b.year || a.month - b.month);
+    }
+
+    async function extractFromDriveLink({ url, sheetNames = '', defaultYear }) {
+      const parsed = parseDriveUrl(url);
+      if (!parsed) throw new Error('Link não reconhecido como Google Drive, Sheets, Docs ou Pasta.');
+
+      // Layer 1: Personal Google Apps Script Connector (reads private/public PDFs, XLSX, multi-tab Sheets, Docs & Folders)
+      if (state.appsScriptUrl && /^https:\/\/script\.google\.com\//i.test(state.appsScriptUrl)) {
+        const apiUrl = `${state.appsScriptUrl}${state.appsScriptUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(url)}`;
+        const payload = await loadJsonp(apiUrl, 'callback', 25000);
+        if (!payload || !payload.ok) {
+          throw new Error(payload?.error || 'Falha no Conector Google Apps Script.');
+        }
+        const collected = [];
+        for (const item of (payload.items || [])) {
+          const itemYear = detectYearInText((item.tab || '') + ' ' + (item.name || ''), defaultYear);
+          if (item.kind === 'matrix' && Array.isArray(item.rows)) {
+            collected.push(...extractFromMatrix(item.rows, itemYear));
+          } else if (item.kind === 'xlsx_b64' && item.data) {
+            collected.push(...await parseXlsxFile(base64ToArrayBuffer(item.data), itemYear));
+          } else if (item.kind === 'pdf_b64' && item.data) {
+            collected.push(...await parsePdfFile(base64ToArrayBuffer(item.data), itemYear));
+          } else if (item.kind === 'text' && item.text) {
+            collected.push(...extractFromFreeText(item.text, itemYear));
+          }
+        }
+        return { rows: mergeExtractedLists(collected), method: 'Conector Google Drive (Apps Script)', parsed };
+      }
+
+      // Layer 2: Google Sheets direct Zero-CORS JSONP (gviz/tq)
+      if (parsed.type === 'sheets') {
+        const customTabs = String(sheetNames || '').split(',').map(s => s.trim()).filter(Boolean);
+        const collected = [];
+        if (customTabs.length > 0) {
+          for (const tab of customTabs) {
+            try {
+              const matrix = await fetchGvizSheetMatrix(parsed.id, { sheetName: tab });
+              const tabYear = detectYearInText(tab, defaultYear);
+              collected.push(...extractFromMatrix(matrix, tabYear));
+            } catch { /* skip missing tab */ }
+          }
+        } else {
+          // Read target gid (or default first sheet)
+          const mainMatrix = await fetchGvizSheetMatrix(parsed.id, { gid: parsed.gid });
+          collected.push(...extractFromMatrix(mainMatrix, defaultYear));
+          // If no gid was pinned, also probe common year tabs (2023..CURRENT_YEAR+1) in parallel
+          if (!parsed.gid) {
+            const probeYears = [];
+            for (let y = BASE_START_YEAR; y <= Math.max(2026, CURRENT_YEAR); y++) probeYears.push(String(y));
+            const probes = await Promise.allSettled(
+              probeYears.map(async yr => {
+                const mat = await fetchGvizSheetMatrix(parsed.id, { sheetName: yr });
+                return extractFromMatrix(mat, Number(yr));
+              })
+            );
+            probes.forEach(p => { if (p.status === 'fulfilled' && p.value.length) collected.push(...p.value); });
+          }
+        }
+        return { rows: mergeExtractedLists(collected), method: 'Google Sheets Direto (Zero-CORS)', parsed };
+      }
+
+      // Layer 3: Published Google Sheet CSV (pub?output=csv)
+      if (parsed.type === 'published_sheets') {
+        const resp = await fetch(parsed.exportUrl, { mode: 'cors' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const txt = await resp.text();
+        document.getElementById('rawTextInput').value = txt.slice(0, 8000);
+        return { rows: extractFromFreeText(txt, defaultYear), method: 'Google Sheets Publicado (CSV)', parsed };
+      }
+
+      // Layer 4: Direct CORS fetch for Docs / Drive File (or guide user to Apps Script connector)
+      if (parsed.type === 'folder') {
+        throw new Error('Para ler pastas inteiras do Google Drive automaticamente, configure o Conector PDF/Privados (leva 1 minuto e é gratuito).');
+      }
+
+      const resp = await fetch(parsed.exportUrl, { mode: 'cors' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const contentType = resp.headers.get('content-type') || '';
+      let extracted = [];
+      if (contentType.includes('pdf')) {
+        extracted = await parsePdfFile(await resp.arrayBuffer(), defaultYear);
+      } else if (contentType.includes('spreadsheetml') || contentType.includes('zip')) {
+        extracted = await parseXlsxFile(await resp.arrayBuffer(), defaultYear);
+      } else {
+        const txt = await resp.text();
+        if (txt.includes('<!DOCTYPE html>') && txt.toLowerCase().includes('accounts.google.com')) {
+          throw new Error('Arquivo privado no Google Drive (exige login ou Conector Apps Script).');
+        }
+        document.getElementById('rawTextInput').value = txt.slice(0, 8000);
+        extracted = extractFromFreeText(txt, defaultYear);
+      }
+      return { rows: extracted, method: `Google Drive (${parsed.type})`, parsed };
+    }
+
+    function saveOrUpdateDriveLink(url, label, sheetNames, markSynced = false) {
+      if (!Array.isArray(state.driveLinks)) state.driveLinks = [];
+      const existing = state.driveLinks.find(l => l.url === url);
+      const parsed = parseDriveUrl(url);
+      if (existing) {
+        if (label) existing.label = label;
+        if (sheetNames !== undefined) existing.sheetNames = sheetNames;
+        if (markSynced) existing.lastSyncedAt = new Date().toISOString();
+      } else {
+        state.driveLinks.unshift({
+          url,
+          label: label || `Google ${(parsed?.type || 'DRIVE').toUpperCase()} (${(parsed?.id || '').slice(0, 8)}...)`,
+          sheetNames: sheetNames || '',
+          addedAt: new Date().toISOString(),
+          lastSyncedAt: markSynced ? new Date().toISOString() : null
+        });
+      }
+      saveState();
+      renderDriveLinks();
     }
 
     async function handleDriveImport() {
       const url = document.getElementById('driveUrlInput').value.trim();
       const label = document.getElementById('driveLabelInput').value.trim();
+      const sheetNames = document.getElementById('driveSheetNameInput').value.trim();
+      const autoApply = document.getElementById('chkDriveAutoApply').checked;
       const defaultYear = Number(document.getElementById('importDefaultYear').value) || selectedYear;
       if (!url) { showToast('Informe um link do Google Drive ou Google Sheets.', 'error'); return; }
 
       const parsed = parseDriveUrl(url);
-      if (!parsed) { showToast('Link não reconhecido como Google Drive/Sheets/Docs válido.', 'error'); return; }
+      if (!parsed) { showToast('Link não reconhecido como Google Drive/Sheets/Docs/Pasta válido.', 'error'); return; }
 
-      // Save link if not yet saved
-      if (!state.driveLinks.some(l => l.url === url)) {
-        state.driveLinks.unshift({ url, label: label || `Google ${parsed.type.toUpperCase()} (${parsed.id.slice(0, 8)}...)`, addedAt: new Date().toISOString() });
-        saveState();
-        renderDriveLinks();
-      }
+      saveOrUpdateDriveLink(url, label, sheetNames, false);
+      showToast('Lendo e extraindo dados do link do Google Drive...', 'info');
 
-      showToast('Tentando leitura autônoma do link do Google Drive...', 'info');
       try {
-        const resp = await fetch(parsed.exportUrl, { mode: 'cors' });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const contentType = resp.headers.get('content-type') || '';
-        let extracted = [];
-        if (contentType.includes('pdf')) {
-          const buf = await resp.arrayBuffer();
-          extracted = await parsePdfFile(buf, defaultYear);
-        } else if (contentType.includes('spreadsheetml') || contentType.includes('zip')) {
-          const buf = await resp.arrayBuffer();
-          extracted = await parseXlsxFile(buf, defaultYear);
+        const result = await extractFromDriveLink({ url, sheetNames, defaultYear });
+        saveOrUpdateDriveLink(url, label, sheetNames, true);
+        if (autoApply && result.rows.length > 0) {
+          const count = applyExtractedRows(result.rows, 'merge');
+          showToast(`${count} mês(es) extraído(s) via ${result.method} e alimentado(s) no dashboard!`, 'success');
+          document.getElementById('extractionPreviewPanel').style.display = 'none';
         } else {
-          const txt = await resp.text();
-          if (txt.includes('<!DOCTYPE html>') && txt.toLowerCase().includes('accounts.google.com')) {
-            throw new Error('Arquivo privado no Google Drive (exige login).');
-          }
-          document.getElementById('rawTextInput').value = txt.slice(0, 8000);
-          extracted = extractFromFreeText(txt, defaultYear);
+          presentExtractionPreview(result.rows, result.method);
         }
-        presentExtractionPreview(extracted, `Google Drive (${parsed.type})`);
       } catch (err) {
-        showToast('O navegador bloqueou a leitura direta (arquivo privado ou CORS). Link salvo! Use "Baixar/Copiar" ou torne o link público para leitura direta.', 'error');
+        showToast('Não foi possível ler diretamente. Veja as opções rápidas abaixo.', 'error');
         const panel = document.getElementById('extractionPreviewPanel');
         panel.style.display = 'block';
+        const isSheet = parsed.type === 'sheets';
         document.getElementById('extractionSummaryText').innerHTML = `
-          Não foi possível ler o link diretamente do navegador (${escapeHtml(err.message)}).
-          Para arquivos privados no Drive: <a href="${escapeHtml(parsed.downloadUrl)}" target="_blank" rel="noopener noreferrer" style="color:#ff9d5c;font-weight:700;">clique aqui para baixar o arquivo do seu Drive</a> e arraste-o na caixa .XLSX ou .PDF acima — ou copie a tabela e cole no campo de texto inteligente!
+          <strong>Atenção na leitura do link:</strong> ${escapeHtml(err.message)}<br/>
+          ${isSheet
+            ? '• <strong>Dica rápida para Google Sheets:</strong> No Google Planilhas clique em <em>Compartilhar → Qualquer pessoa com o link (Leitor)</em> e clique novamente em <strong>Extrair e Alimentar</strong> (funciona direto sem CORS!).'
+            : '• <strong>Para PDFs, .XLSX, Pastas ou arquivos privados no Drive:</strong> Clique em <strong>Conector PDF/Privados</strong> (1 minuto, gratuito na sua conta Google) OU <a href="' + escapeHtml(parsed.downloadUrl) + '" target="_blank" rel="noopener noreferrer" style="color:#ff9d5c;font-weight:700;">baixe o arquivo aqui</a> e solte na caixa .XLSX / .PDF acima.'}
         `;
         document.getElementById('extractionPreviewTable').innerHTML = '';
       }
+    }
+
+    async function syncAllDriveLinks(silent = false) {
+      const links = state.driveLinks || [];
+      if (!links.length) {
+        if (!silent) showToast('Nenhum link do Google Drive salvo para sincronizar.', 'error');
+        return;
+      }
+      if (!silent) showToast(`Sincronizando ${links.length} link(s) do Google Drive...`, 'info');
+      let totalRows = [];
+      let okCount = 0, failCount = 0;
+
+      for (const item of links) {
+        const defY = detectYearInText(item.label || '', selectedYear);
+        try {
+          const res = await extractFromDriveLink({ url: item.url, sheetNames: item.sheetNames || '', defaultYear: defY });
+          if (res.rows.length) {
+            totalRows.push(...res.rows);
+            item.lastSyncedAt = new Date().toISOString();
+            okCount++;
+          }
+        } catch {
+          failCount++;
+        }
+      }
+
+      const merged = mergeExtractedLists(totalRows);
+      if (merged.length > 0) {
+        const applied = applyExtractedRows(merged, 'merge');
+        showToast(`Sincronização concluída: ${applied} mês(es) atualizado(s) de ${okCount} fonte(s) do Drive${failCount ? ` (${failCount} falharam)` : ''}!`, 'success');
+      } else if (!silent) {
+        showToast(`Nenhum dado novo extraído (${failCount} link(s) indisponíveis ou privados).`, 'error');
+      }
+      saveState();
+      renderDriveLinks();
+    }
+
+    function applyExtractedRows(rows, mode = 'merge') {
+      let count = 0;
+      rows.forEach(item => {
+        const y = item.year;
+        if (!state.years[y]) {
+          state.years[y] = Array.from({ length: 12 }, () => emptyMonthRecord());
+          state.goals[y] = Array.from({ length: 12 }, () => 0);
+        }
+        if (Array.isArray(state.deletedYears)) {
+          state.deletedYears = state.deletedYears.filter(dy => dy !== y);
+        }
+        const existing = mode === 'replace' ? emptyMonthRecord() : normalizeRecord(state.years[y][item.month]);
+        if (item.anuidades_pf > 0 || mode === 'replace') existing.anuidades_pf = item.anuidades_pf;
+        if (item.anuidades_pj > 0 || mode === 'replace') existing.anuidades_pj = item.anuidades_pj;
+        if (item.autos_adm > 0 || mode === 'replace') existing.autos_adm = item.autos_adm;
+        if (item.autos_da > 0 || mode === 'replace') existing.autos_da = item.autos_da;
+        if (item.autos_adm === 0 && item.autos_da === 0 && item.autos_total > 0) {
+          existing.autos_manual = true;
+          existing.autos_total = item.autos_total;
+        } else {
+          existing.autos_manual = false;
+        }
+        state.years[y][item.month] = normalizeRecord(existing);
+        if (item.goal > 0) state.goals[y][item.month] = item.goal;
+        selectedYear = y;
+        count++;
+      });
+
+      if (count > 0) {
+        state.isDemo = false;
+        saveState();
+        renderAll();
+      }
+      return count;
     }
 
     function presentExtractionPreview(rows, sourceLabel) {
@@ -3237,36 +3704,9 @@
     function confirmPendingImport() {
       if (!pendingImportRows.length) return;
       const mode = document.getElementById('importMergeMode').value;
-      let count = 0;
-
-      pendingImportRows.forEach(item => {
-        const y = item.year;
-        if (!state.years[y]) {
-          state.years[y] = Array.from({ length: 12 }, () => emptyMonthRecord());
-          state.goals[y] = Array.from({ length: 12 }, () => 0);
-        }
-        const existing = mode === 'replace' ? emptyMonthRecord() : normalizeRecord(state.years[y][item.month]);
-        if (item.anuidades_pf > 0 || mode === 'replace') existing.anuidades_pf = item.anuidades_pf;
-        if (item.anuidades_pj > 0 || mode === 'replace') existing.anuidades_pj = item.anuidades_pj;
-        if (item.autos_adm > 0 || mode === 'replace') existing.autos_adm = item.autos_adm;
-        if (item.autos_da > 0 || mode === 'replace') existing.autos_da = item.autos_da;
-        if (item.autos_adm === 0 && item.autos_da === 0 && item.autos_total > 0) {
-          existing.autos_manual = true;
-          existing.autos_total = item.autos_total;
-        } else {
-          existing.autos_manual = false;
-        }
-        state.years[y][item.month] = normalizeRecord(existing);
-        if (item.goal > 0) state.goals[y][item.month] = item.goal;
-        selectedYear = y;
-        count++;
-      });
-
-      state.isDemo = false;
-      saveState();
+      const count = applyExtractedRows(pendingImportRows, mode);
       pendingImportRows = [];
       document.getElementById('extractionPreviewPanel').style.display = 'none';
-      renderAll();
       showToast(`${count} mês(es) importado(s) e integrado(s) ao dashboard!`, 'success');
     }
 
@@ -4173,16 +4613,71 @@
       pdfInput.addEventListener('change', e => { handlePdfUpload(e.target.files[0]); pdfInput.value = ''; });
       setupDropzone('dropzonePdf', handlePdfUpload);
 
-      // Drive Import
+      // Drive Import & Sync
       document.getElementById('btnFetchDrive').addEventListener('click', handleDriveImport);
       document.getElementById('btnSaveDriveLink').addEventListener('click', () => {
         const url = document.getElementById('driveUrlInput').value.trim();
         const label = document.getElementById('driveLabelInput').value.trim();
+        const sheetNames = document.getElementById('driveSheetNameInput').value.trim();
         if (!url) { showToast('Cole um link do Google Drive primeiro.', 'error'); return; }
-        state.driveLinks.unshift({ url, label: label || 'Link Google Drive', addedAt: new Date().toISOString() });
+        saveOrUpdateDriveLink(url, label, sheetNames, false);
+        showToast('Link salvo nas fontes conectadas do Google Drive!', 'success');
+      });
+      document.getElementById('btnSyncAllDrive').addEventListener('click', () => syncAllDriveLinks(false));
+      document.getElementById('chkAutoSyncDrive').addEventListener('change', e => {
+        state.autoSyncDrive = !!e.target.checked;
+        saveState();
+        showToast(state.autoSyncDrive ? 'Sincronização automática do Google Drive ativada ao abrir!' : 'Sincronização automática desativada.', 'info');
+      });
+
+      // Apps Script Connector Modal
+      const openAppsScriptModal = () => {
+        document.getElementById('appsScriptUrlInput').value = state.appsScriptUrl || '';
+        document.getElementById('appsScriptCodePreview').value = APPS_SCRIPT_TEMPLATE;
+        document.getElementById('appsScriptModalBackdrop').classList.add('open');
+      };
+      const closeAppsScriptModal = () => {
+        document.getElementById('appsScriptModalBackdrop').classList.remove('open');
+      };
+      document.getElementById('btnOpenAppsScriptModal').addEventListener('click', openAppsScriptModal);
+      document.getElementById('btnCloseAppsScriptModal').addEventListener('click', closeAppsScriptModal);
+      document.getElementById('btnCancelAppsScriptModal').addEventListener('click', closeAppsScriptModal);
+      document.getElementById('appsScriptModalBackdrop').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeAppsScriptModal();
+      });
+      document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', () => {
+        const u = document.getElementById('appsScriptUrlInput').value.trim();
+        if (!u || !/^https:\/\/script\.google\.com\//i.test(u)) {
+          showToast('Informe uma URL válida do Google Apps Script (https://script.google.com/macros/s/.../exec).', 'error');
+          return;
+        }
+        state.appsScriptUrl = u;
         saveState();
         renderDriveLinks();
-        showToast('Link salvo na sua lista do Google Drive!', 'success');
+        closeAppsScriptModal();
+        showToast('Conector Google Drive salvo! Agora você pode ler PDFs, XLSX, Pastas e arquivos privados direto pelo link.', 'success');
+      });
+      document.getElementById('btnClearAppsScriptUrl').addEventListener('click', () => {
+        state.appsScriptUrl = '';
+        document.getElementById('appsScriptUrlInput').value = '';
+        saveState();
+        renderDriveLinks();
+        showToast('Conector removido.', 'info');
+      });
+      document.getElementById('btnCopyAppsScriptCode').addEventListener('click', async () => {
+        const ta = document.getElementById('appsScriptCodePreview');
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(APPS_SCRIPT_TEMPLATE);
+          } else {
+            ta.select();
+            document.execCommand('copy');
+          }
+          showToast('Código do Conector copiado! Cole em script.google.com.', 'success');
+        } catch {
+          ta.select();
+          showToast('Selecione e copie o código no campo acima (Ctrl+C).', 'info');
+        }
       });
 
       // Raw Text Intelligent Parse
@@ -4203,7 +4698,7 @@
       // JSON Backup / Restore / Demo
       document.getElementById('btnExportJSON').addEventListener('click', () => {
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-        downloadBlob(blob, `Backup_Dashboard_Financeiro_${new Date().toISOString().slice(0, 10)}.json`);
+        downloadBlob(blob, `Backup_Acompanhamento_Financeiro_${new Date().toISOString().slice(0, 10)}.json`);
         showToast('Backup .JSON exportado com sucesso!', 'success');
       });
       const jsonInput = document.getElementById('fileInputJson');
@@ -4253,6 +4748,22 @@
     state = loadState();
     bindEvents();
     renderAll();
+
+    // Auto-feed from ?drive=<URL> query parameter or saved autoSyncDrive links
+    (async () => {
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const driveParam = params.get('drive');
+        if (driveParam) {
+          document.getElementById('driveUrlInput').value = driveParam;
+          await handleDriveImport();
+        } else if (state.autoSyncDrive && state.driveLinks && state.driveLinks.length > 0) {
+          await syncAllDriveLinks(true);
+        }
+      } catch (e) {
+        console.warn('Auto-sync Drive:', e);
+      }
+    })();
   })();
   </script>
 </body>
